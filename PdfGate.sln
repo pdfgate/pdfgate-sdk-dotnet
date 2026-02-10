@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfGate.net", "src\PdfGate.net\PdfGate.net.csproj", "{A5BC2F11-4570-4D32-A083-DA9BF70BA2ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfGate.net.AcceptanceTests", "tests\PdfGate.net.AcceptanceTests\PdfGate.net.AcceptanceTests.csproj", "{D66C6100-A0DA-47AE-8CA5-C43EF6D100EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5BC2F11-4570-4D32-A083-DA9BF70BA2ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5BC2F11-4570-4D32-A083-DA9BF70BA2ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5BC2F11-4570-4D32-A083-DA9BF70BA2ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5BC2F11-4570-4D32-A083-DA9BF70BA2ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D66C6100-A0DA-47AE-8CA5-C43EF6D100EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D66C6100-A0DA-47AE-8CA5-C43EF6D100EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D66C6100-A0DA-47AE-8CA5-C43EF6D100EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D66C6100-A0DA-47AE-8CA5-C43EF6D100EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
