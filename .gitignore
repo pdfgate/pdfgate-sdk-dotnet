@@ -55,3 +55,6 @@ nunit-*.xml
 
 # Idea
 .idea
+
+# Rider
+*.DotSettings.user
