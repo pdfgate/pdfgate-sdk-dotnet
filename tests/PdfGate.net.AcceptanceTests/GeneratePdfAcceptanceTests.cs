@@ -65,6 +65,24 @@ public sealed class GeneratePdfAcceptanceTests : IClassFixture<PdfGateAcceptance
 
         Assert.Equal(DocumentStatus.Completed, response.Status);
     }
+
+    /// <summary>
+    ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
+    /// </summary>
+    [Fact]
+    public async Task GeneratePdfAsync_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
+    {
+        PdfGate client = _fixture.GetClientOrSkip();
+
+        var request = new GeneratePdfRequest();
+
+        PdfGateException exception = await Assert.ThrowsAsync<PdfGateException>(
+            () => client.GeneratePdfAsync(request, TestContext.Current.CancellationToken));
+
+        Assert.NotNull(exception.StatusCode);
+        Assert.False(string.IsNullOrWhiteSpace(exception.ResponseBody));
+        Assert.Contains(exception.ResponseBody!, exception.Message, StringComparison.Ordinal);
+    }
 }
 
 /// <summary>
