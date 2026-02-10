@@ -132,7 +132,8 @@ internal sealed class
     public override DocumentType? Read(ref Utf8JsonReader reader,
         Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.Null) return null;
+        if (reader.TokenType == JsonTokenType.Null)
+            return null;
 
         var value = reader.GetString();
         return value switch
