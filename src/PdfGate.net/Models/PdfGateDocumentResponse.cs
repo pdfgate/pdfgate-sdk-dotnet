@@ -62,6 +62,15 @@ public sealed record PdfGateDocumentResponse
         get;
         init;
     }
+
+    /// <summary>
+    ///     Document ID. This document was the result of modifying derivedFrom.
+    /// </summary>
+    public string? derivedFrom
+    {
+        get;
+        init;
+    } = string.Empty;
 }
 
 /// <summary>

@@ -1,5 +1,3 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -29,7 +27,8 @@ public sealed class PdfGate : IDisposable
         }
     };
 
-    private readonly HttpClient _httpClient;
+    private readonly PdfGateHttpClient _httpClient;
+    private readonly PdfGateResponseParser _responseParser;
 
     /// <summary>
     ///     Creates a new <see cref="PdfGate" /> instance.
@@ -40,10 +39,9 @@ public sealed class PdfGate : IDisposable
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("An API key is required.");
 
-        _httpClient = new HttpClient();
-        _httpClient.BaseAddress = GetBaseUriFromApiKey(apiKey);
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", apiKey);
+        Uri baseAddress = GetBaseUriFromApiKey(apiKey);
+        _httpClient = new PdfGateHttpClient(apiKey, baseAddress, JsonOptions);
+        _responseParser = new PdfGateResponseParser(JsonOptions);
     }
 
     /// <inheritdoc />
@@ -77,39 +75,14 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        try
-        {
-            using HttpResponseMessage response = await _httpClient
-                .PostAsJsonAsync("v1/generate/pdf", request, JsonOptions,
-                    cancellationToken)
-                .ConfigureAwait(false);
+        var url = "v1/generate/pdf";
+        var content = await _httpClient.PostAsJsonAsync(url,
+            request,
+            cancellationToken);
 
-            var content = await response.Content
-                .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-                throw PdfGateException.FromHttpError(response.StatusCode,
-                    "v1/generate/pdf", content);
-
-            var document =
-                JsonSerializer.Deserialize<PdfGateDocumentResponse>(content,
-                    JsonOptions);
-            if (document is null || document.Status is null)
-                throw new PdfGateException(
-                    "The API returned an invalid response for endpoint 'v1/generate/pdf'.");
-
-            return document;
-        }
-        catch (PdfGateException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new PdfGateException(
-                "Failed to call endpoint 'v1/generate/pdf'.", ex);
-        }
+        return _responseParser.Parse(content, url);
     }
+
 
     /// <summary>
     ///     Flattens a PDF and returns document metadata.
@@ -123,40 +96,10 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        try
-        {
-            using MultipartFormDataContent form =
-                PdfGateRequestBuilder.BuildFlattenPdfFormData(request,
-                    JsonOptions);
+        var url = "forms/flatten";
+        var content = await _httpClient.PostAsync(url, request,
+            cancellationToken);
 
-            using HttpResponseMessage response = await _httpClient
-                .PostAsync("forms/flatten", form, cancellationToken)
-                .ConfigureAwait(false);
-
-            var content = await response.Content
-                .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-                throw PdfGateException.FromHttpError(response.StatusCode,
-                    "forms/flatten", content);
-
-            var document =
-                JsonSerializer.Deserialize<PdfGateDocumentResponse>(content,
-                    JsonOptions);
-            if (document is null || document.Status is null)
-                throw new PdfGateException(
-                    "The API returned an invalid response for endpoint 'forms/flatten'.");
-
-            return document;
-        }
-        catch (PdfGateException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new PdfGateException(
-                "Failed to call endpoint 'forms/flatten'.", ex);
-        }
+        return _responseParser.Parse(content, url);
     }
 }
