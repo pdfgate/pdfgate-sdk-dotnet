@@ -110,4 +110,53 @@ public sealed class PdfGate : IDisposable
                 "Failed to call endpoint 'v1/generate/pdf'.", ex);
         }
     }
+
+    /// <summary>
+    ///     Flattens a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Flatten PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Flattened document metadata response.</returns>
+    public async Task<PdfGateDocumentResponse> FlattenPdfAsync(
+        FlattenPdfRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        try
+        {
+            using MultipartFormDataContent form =
+                PdfGateRequestBuilder.BuildFlattenPdfFormData(request,
+                    JsonOptions);
+
+            using HttpResponseMessage response = await _httpClient
+                .PostAsync("forms/flatten", form, cancellationToken)
+                .ConfigureAwait(false);
+
+            var content = await response.Content
+                .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                throw PdfGateException.FromHttpError(response.StatusCode,
+                    "forms/flatten", content);
+
+            var document =
+                JsonSerializer.Deserialize<PdfGateDocumentResponse>(content,
+                    JsonOptions);
+            if (document is null || document.Status is null)
+                throw new PdfGateException(
+                    "The API returned an invalid response for endpoint 'forms/flatten'.");
+
+            return document;
+        }
+        catch (PdfGateException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new PdfGateException(
+                "Failed to call endpoint 'forms/flatten'.", ex);
+        }
+    }
 }
