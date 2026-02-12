@@ -75,7 +75,7 @@ public sealed record PdfGateDocumentResponse
     /// <summary>
     ///     Document ID. This document was the result of modifying derivedFrom.
     /// </summary>
-    public string? derivedFrom
+    public string? DerivedFrom
     {
         get;
         init;
