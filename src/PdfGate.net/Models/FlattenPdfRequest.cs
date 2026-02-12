@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace PdfGate.net.Models;
 
 /// <summary>
@@ -41,17 +39,7 @@ public sealed record PdfGateFile
 public sealed record FlattenPdfRequest
 {
     /// <summary>
-    ///     Source PDF file bytes. Provide this or <see cref="DocumentId" />.
-    /// </summary>
-    [JsonIgnore]
-    public PdfGateFile? File
-    {
-        get;
-        init;
-    }
-
-    /// <summary>
-    ///     Existing stored PDF document ID. Provide this or <see cref="File" />.
+    ///     Existing stored PDF document ID..
     /// </summary>
     public string? DocumentId
     {

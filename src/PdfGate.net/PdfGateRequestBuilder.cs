@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -43,20 +42,10 @@ internal static class PdfGateRequestBuilder
                     Encoding.UTF8),
                 "metadata");
 
-        if (request.File is { Content.Length: > 0 } file)
-        {
-            var fileContent = new ByteArrayContent(file.Content);
-            fileContent.Headers.ContentType =
-                MediaTypeHeaderValue.Parse(file.Type);
-
-            form.Add(fileContent, "file", file.Name);
-        }
-        else if (!string.IsNullOrWhiteSpace(request.DocumentId))
-        {
+        if (!string.IsNullOrWhiteSpace(request.DocumentId))
             form.Add(
                 new StringContent(request.DocumentId, Encoding.UTF8),
                 "documentId");
-        }
 
         return form;
     }
