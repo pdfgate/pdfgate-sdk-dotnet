@@ -23,9 +23,10 @@ public sealed class PdfGateHttpClientTests
                 Content = new StringContent(responseBody)
             }));
 
+        var request = new GeneratePdfRequest { Html = "<p>hello</p>" };
         var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
             client.PostAsJsonAsync(endpoint,
-                new GeneratePdfRequest { Html = "<p>hello</p>" },
+                JsonSerializer.Serialize(request),
                 TestContext.Current.CancellationToken));
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, exception.StatusCode);
@@ -42,9 +43,10 @@ public sealed class PdfGateHttpClientTests
         using PdfGateHttpClient client = CreateClient(_ =>
             Task.FromException<HttpResponseMessage>(innerException));
 
+        var request = new GeneratePdfRequest { Html = "<p>hello</p>" };
         var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
             client.PostAsJsonAsync("v1/generate/pdf",
-                new GeneratePdfRequest { Html = "<p>hello</p>" },
+                JsonSerializer.Serialize(request),
                 TestContext.Current.CancellationToken));
 
         Assert.Same(innerException, exception.InnerException);
@@ -62,9 +64,10 @@ public sealed class PdfGateHttpClientTests
         var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
+        var request = new GeneratePdfRequest { Html = "<p>hello</p>" };
         await Assert.ThrowsAsync<TaskCanceledException>(() =>
             client.PostAsJsonAsync("v1/generate/pdf",
-                new GeneratePdfRequest { Html = "<p>hello</p>" },
+                JsonSerializer.Serialize(request),
                 cts.Token));
     }
 

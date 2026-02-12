@@ -47,29 +47,15 @@ internal sealed class PdfGateHttpClient : IDisposable
     }
 
     public async Task<string> PostAsJsonAsync(string url,
-        GeneratePdfRequest request,
+        string request,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
+        using var content =
+            new StringContent(request, Encoding.UTF8, "application/json");
 
         return await TryPost(async () => await _httpClient
-            .PostAsJsonAsync(url, request, _jsonOptions,
-                cancellationToken)
-            .ConfigureAwait(false), url, cancellationToken);
-    }
-
-    public async Task<string> PostAsync(string url,
-        FlattenPdfRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-
-        using MultipartFormDataContent form =
-            PdfGateRequestBuilder.BuildFlattenPdfFormData(request,
-                _jsonOptions);
-
-        return await TryPost(async () => await _httpClient
-            .PostAsync(url, form, cancellationToken)
+            .PostAsync(url, content, cancellationToken)
             .ConfigureAwait(false), url, cancellationToken);
     }
 

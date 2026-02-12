@@ -76,8 +76,9 @@ public sealed class PdfGate : IDisposable
         ArgumentNullException.ThrowIfNull(request);
 
         var url = "v1/generate/pdf";
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url,
-            request,
+            jsonRequest,
             cancellationToken);
 
         return _responseParser.Parse(content, url);
@@ -97,7 +98,8 @@ public sealed class PdfGate : IDisposable
         ArgumentNullException.ThrowIfNull(request);
 
         var url = "forms/flatten";
-        var content = await _httpClient.PostAsync(url, request,
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
             cancellationToken);
 
         return _responseParser.Parse(content, url);
