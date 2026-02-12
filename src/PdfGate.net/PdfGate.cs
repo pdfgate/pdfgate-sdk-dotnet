@@ -153,10 +153,19 @@ public sealed class PdfGate : IDisposable
 
         var url = "upload";
         var form = new MultipartFormDataContent();
-        var fileContent = new StreamContent(request.Content);
-        fileContent.Headers.ContentType =
-            new MediaTypeHeaderValue("application/pdf");
-        form.Add(fileContent, "file", "input.pdf");
+        if (request.Url is not null)
+        {
+            form.Add(new StringContent(request.Url.AbsoluteUri, Encoding.UTF8),
+                "url");
+        }
+        else
+        {
+            var fileContent = new StreamContent(request.Content);
+            fileContent.Headers.ContentType =
+                new MediaTypeHeaderValue("application/pdf");
+            form.Add(fileContent, "file", "input.pdf");
+        }
+
         if (request.Metadata is not null)
             form.Add(new StringContent(
                 JsonSerializer.Serialize(request.Metadata, JsonOptions),

@@ -12,6 +12,15 @@ public sealed record UploadFileRequest
     } = Stream.Null;
 
     /// <summary>
+    ///     URL to a PDF file
+    /// </summary>
+    public Uri? Url
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Custom metadata attached to the generated document.
     /// </summary>
     public object? Metadata

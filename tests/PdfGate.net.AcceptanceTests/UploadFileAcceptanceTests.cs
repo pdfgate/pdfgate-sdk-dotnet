@@ -40,5 +40,27 @@ public class
                 TestContext.Current.CancellationToken);
 
         Assert.Equal(DocumentStatus.Completed, uploadedResponse.Status);
+        Assert.Equal(DocumentType.Uploaded, uploadedResponse.Type);
+    }
+
+    /// <summary>
+    ///     Uploads a file by URL
+    /// </summary>
+    [Fact]
+    public async Task UploadFileAsync_UploadsFileByUrl()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        var request = new UploadFileRequest
+        {
+            Url =
+                new Uri(
+                    "https://www.rd.usda.gov/sites/default/files/pdf-sample_0.pdf")
+        };
+        PdfGateDocumentResponse uploadedResponse =
+            await client.UploadFileAsync(request,
+                TestContext.Current.CancellationToken);
+
+        Assert.Equal(DocumentStatus.Completed, uploadedResponse.Status);
+        Assert.Equal(DocumentType.Uploaded, uploadedResponse.Type);
     }
 }
