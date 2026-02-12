@@ -5,19 +5,27 @@ namespace PdfGate.net.AcceptanceTests;
 /// <summary>
 ///     Shared fixture for acceptance tests that require a configured API client.
 /// </summary>
-public sealed class PdfGateAcceptanceFixture : IDisposable
+public sealed class PdfGateClientFixture : IDisposable
 {
-    private const string MissingApiKeyMessage = "Set PDFGATE_API_KEY to run acceptance tests.";
+    private const string MissingApiKeyMessage =
+        "Set PDFGATE_API_KEY to run acceptance tests.";
+
     private readonly PdfGate? _client;
 
     /// <summary>
     ///     Initializes the client when a test API key is available.
     /// </summary>
-    public PdfGateAcceptanceFixture()
+    public PdfGateClientFixture()
     {
         var apiKey = Environment.GetEnvironmentVariable("PDFGATE_API_KEY");
         if (!string.IsNullOrWhiteSpace(apiKey))
             _client = new PdfGate(apiKey);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _client?.Dispose();
     }
 
     /// <summary>
@@ -29,11 +37,5 @@ public sealed class PdfGateAcceptanceFixture : IDisposable
             Assert.Skip(MissingApiKeyMessage);
 
         return _client;
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        _client?.Dispose();
     }
 }

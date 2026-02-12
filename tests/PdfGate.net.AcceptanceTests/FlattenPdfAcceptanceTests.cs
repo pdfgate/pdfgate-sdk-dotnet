@@ -8,14 +8,14 @@ namespace PdfGate.net.AcceptanceTests;
 ///     Acceptance tests for flatten PDF operations against the live API.
 /// </summary>
 public sealed class
-    FlattenPdfAcceptanceTests : IClassFixture<PdfGateAcceptanceFixture>
+    FlattenPdfAcceptanceTests : IClassFixture<PdfGateClientFixture>
 {
-    private readonly PdfGateAcceptanceFixture _fixture;
+    private readonly PdfGateClientFixture _fixture;
 
     /// <summary>
     ///     Initializes the test class with a shared acceptance fixture.
     /// </summary>
-    public FlattenPdfAcceptanceTests(PdfGateAcceptanceFixture fixture)
+    public FlattenPdfAcceptanceTests(PdfGateClientFixture fixture)
     {
         _fixture = fixture;
     }

@@ -7,14 +7,15 @@ namespace PdfGate.net.AcceptanceTests;
 /// <summary>
 ///     Acceptance tests for generate PDF operations against the live API.
 /// </summary>
-public sealed class GeneratePdfAcceptanceTests : IClassFixture<PdfGateAcceptanceFixture>
+public sealed class
+    GeneratePdfAcceptanceTests : IClassFixture<PdfGateClientFixture>
 {
-    private readonly PdfGateAcceptanceFixture _fixture;
+    private readonly PdfGateClientFixture _fixture;
 
     /// <summary>
     ///     Initializes the test class with a shared acceptance fixture.
     /// </summary>
-    public GeneratePdfAcceptanceTests(PdfGateAcceptanceFixture fixture)
+    public GeneratePdfAcceptanceTests(PdfGateClientFixture fixture)
     {
         _fixture = fixture;
     }
@@ -55,10 +56,7 @@ public sealed class GeneratePdfAcceptanceTests : IClassFixture<PdfGateAcceptance
             PageSizeType = GeneratePdfPageSizeType.A4,
             Margin = new GeneratePdfPageMargin
             {
-                Top = "20px",
-                Bottom = "20px",
-                Left = "12px",
-                Right = "12px"
+                Top = "20px", Bottom = "20px", Left = "12px", Right = "12px"
             }
         };
 
@@ -73,17 +71,20 @@ public sealed class GeneratePdfAcceptanceTests : IClassFixture<PdfGateAcceptance
     ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
     /// </summary>
     [Fact]
-    public async Task GeneratePdfAsync_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
+    public async Task
+        GeneratePdfAsync_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
         PdfGate client = _fixture.GetClientOrSkip();
 
         var request = new GeneratePdfRequest();
 
-        PdfGateException exception = await Assert.ThrowsAsync<PdfGateException>(
-            () => client.GeneratePdfAsync(request, TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
+            client.GeneratePdfAsync(request,
+                TestContext.Current.CancellationToken));
 
         Assert.NotNull(exception.StatusCode);
         Assert.False(string.IsNullOrWhiteSpace(exception.ResponseBody));
-        Assert.Contains(exception.ResponseBody!, exception.Message, StringComparison.Ordinal);
+        Assert.Contains(exception.ResponseBody!, exception.Message,
+            StringComparison.Ordinal);
     }
 }
