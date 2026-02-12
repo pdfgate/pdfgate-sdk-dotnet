@@ -64,6 +64,15 @@ public sealed record PdfGateDocumentResponse
     }
 
     /// <summary>
+    ///     Date until it will be stored
+    /// </summary>
+    public DateTimeOffset? ExpiresAt
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Document ID. This document was the result of modifying derivedFrom.
     /// </summary>
     public string? derivedFrom
