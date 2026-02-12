@@ -6,9 +6,9 @@ using Xunit;
 
 namespace PdfGate.net.AcceptanceTests;
 
+[Collection(AcceptanceTestCollection.Name)]
 public sealed class
-    GetFileAcceptanceTests : IClassFixture<PdfGateClientFixture>,
-    IClassFixture<PdfGateDocumentFixture>
+    GetFileAcceptanceTests : IClassFixture<PdfGateDocumentFixture>
 {
     private readonly PdfGateClientFixture _clientFixture;
     private readonly PdfGateDocumentFixture _documentFixture;

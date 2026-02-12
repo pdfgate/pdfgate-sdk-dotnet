@@ -30,6 +30,17 @@ public sealed class PdfGate : IDisposable
     private readonly PdfGateHttpClient _httpClient;
     private readonly PdfGateResponseParser _responseParser;
 
+    public PdfGate(string apiKey, int maxConcurrency)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            throw new ArgumentException("An API key is required.");
+
+        Uri baseAddress = GetBaseUriFromApiKey(apiKey);
+        _httpClient = new PdfGateHttpClient(apiKey, baseAddress, JsonOptions,
+            maxConcurrency);
+        _responseParser = new PdfGateResponseParser(JsonOptions);
+    }
+
     /// <summary>
     ///     Creates a new <see cref="PdfGate" /> instance.
     /// </summary>

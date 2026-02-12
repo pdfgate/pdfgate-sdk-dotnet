@@ -1,8 +1,6 @@
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
-
-using PdfGate.net.Models;
 
 namespace PdfGate.net;
 
@@ -17,6 +15,13 @@ internal sealed class PdfGateHttpClient : IDisposable
     public PdfGateHttpClient(string apiKey, Uri baseAddress,
         JsonSerializerOptions jsonOptions)
         : this(apiKey, baseAddress, new HttpClient(), jsonOptions)
+    {
+    }
+
+    public PdfGateHttpClient(string apiKey, Uri baseAddress,
+        JsonSerializerOptions jsonOptions, int maxConcurrency) : this(apiKey,
+        baseAddress,
+        BuildHttpClientWithMaxConcurrency(maxConcurrency), jsonOptions)
     {
     }
 
@@ -40,10 +45,25 @@ internal sealed class PdfGateHttpClient : IDisposable
         _jsonOptions = jsonOptions;
     }
 
+
     /// <inheritdoc />
     public void Dispose()
     {
         _httpClient.Dispose();
+    }
+
+    private static HttpClient BuildHttpClientWithMaxConcurrency(
+        int maxConcurrency)
+    {
+        var handler = new SocketsHttpHandler
+        {
+            MaxConnectionsPerServer =
+                maxConcurrency // max concurrent connections per host
+        };
+
+        var httpClient = new HttpClient(handler);
+
+        return httpClient;
     }
 
     public async Task<string> PostAsJsonAsync(string url,

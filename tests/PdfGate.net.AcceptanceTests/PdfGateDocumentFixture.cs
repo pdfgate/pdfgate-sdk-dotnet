@@ -14,7 +14,8 @@ public sealed class PdfGateDocumentFixture
     public async Task<PdfGateDocumentResponse> GetDocumentOrSkipAsync(
         PdfGate? client)
     {
-        if (_document != null) return _document;
+        if (_document != null)
+            return _document;
 
         if (client is null)
             Assert.Skip("No client to get an example document");

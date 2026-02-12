@@ -7,8 +7,9 @@ namespace PdfGate.net.AcceptanceTests;
 /// <summary>
 ///     Acceptance tests for generate PDF operations against the live API.
 /// </summary>
+[Collection(AcceptanceTestCollection.Name)]
 public sealed class
-    GeneratePdfAcceptanceTests : IClassFixture<PdfGateClientFixture>
+    GeneratePdfAcceptanceTests
 {
     private readonly PdfGateClientFixture _fixture;
 
@@ -56,7 +57,10 @@ public sealed class
             PageSizeType = GeneratePdfPageSizeType.A4,
             Margin = new GeneratePdfPageMargin
             {
-                Top = "20px", Bottom = "20px", Left = "12px", Right = "12px"
+                Top = "20px",
+                Bottom = "20px",
+                Left = "12px",
+                Right = "12px"
             }
         };
 

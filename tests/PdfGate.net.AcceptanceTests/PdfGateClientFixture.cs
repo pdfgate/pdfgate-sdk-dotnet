@@ -3,6 +3,26 @@ using Xunit;
 namespace PdfGate.net.AcceptanceTests;
 
 /// <summary>
+///     Shared collection name for acceptance tests that use a singleton PdfGate client.
+/// </summary>
+public static class AcceptanceTestCollection
+{
+    /// <summary>
+    ///     The collection name used to share fixtures across acceptance test classes.
+    /// </summary>
+    public const string Name = "PdfGate Acceptance Tests";
+}
+
+/// <summary>
+///     Defines the acceptance test collection and shares fixtures across all test classes in the collection.
+/// </summary>
+[CollectionDefinition(AcceptanceTestCollection.Name)]
+public sealed class
+    AcceptanceTestCollectionDefinition : ICollectionFixture<PdfGateClientFixture>
+{
+}
+
+/// <summary>
 ///     Shared fixture for acceptance tests that require a configured API client.
 /// </summary>
 public sealed class PdfGateClientFixture : IDisposable
@@ -19,7 +39,7 @@ public sealed class PdfGateClientFixture : IDisposable
     {
         var apiKey = Environment.GetEnvironmentVariable("PDFGATE_API_KEY");
         if (!string.IsNullOrWhiteSpace(apiKey))
-            _client = new PdfGate(apiKey);
+            _client = new PdfGate(apiKey, 2);
     }
 
     /// <inheritdoc />
