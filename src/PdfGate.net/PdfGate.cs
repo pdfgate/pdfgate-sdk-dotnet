@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -133,5 +135,45 @@ public sealed class PdfGate : IDisposable
             await _httpClient.GetStreamAsync(url, cancellationToken);
 
         return content;
+    }
+
+    /// <summary>
+    ///     Upload a PDF file so you can apply any transformation to it.
+    ///     The stream passed in the request is owned by the caller so it must
+    ///     be disposed by the caller.
+    /// </summary>
+    /// <param name="request">UploadFile request payload holds the file.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The uploaded document metadata to use to operate on it</returns>
+    public async Task<PdfGateDocumentResponse> UploadFileAsync(
+        UploadFileRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = "upload";
+        var form = new MultipartFormDataContent();
+        var fileContent = new StreamContent(request.Content);
+        fileContent.Headers.ContentType =
+            new MediaTypeHeaderValue("application/pdf");
+        form.Add(fileContent, "file", "input.pdf");
+        if (request.Metadata is not null)
+            form.Add(new StringContent(
+                JsonSerializer.Serialize(request.Metadata, JsonOptions),
+                Encoding.UTF8), "metadata");
+
+        if (request.PreSignedUrlExpiresIn.HasValue)
+            form.Add(
+                new StringContent(
+                    request.PreSignedUrlExpiresIn.Value.ToString(),
+                    Encoding.UTF8),
+                "preSignedUrlExpiresIn");
+
+
+        var response =
+            await _httpClient.PostAsMultipartAsync(url, form,
+                cancellationToken);
+
+        return _responseParser.Parse(response, url);
     }
 }

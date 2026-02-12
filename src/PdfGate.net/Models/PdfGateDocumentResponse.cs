@@ -141,7 +141,12 @@ public enum DocumentType
     /// <summary>
     ///     Document created by signing.
     /// </summary>
-    Signed
+    Signed,
+
+    /// <summary>
+    ///     Document uploaded by file or URL.
+    /// </summary>
+    Uploaded
 }
 
 internal sealed class
@@ -162,6 +167,7 @@ internal sealed class
             "encrypted" => DocumentType.Encrypted,
             "compressed" => DocumentType.Compressed,
             "signed" => DocumentType.Signed,
+            "uploaded" => DocumentType.Uploaded,
             _ => throw new JsonException($"Unknown document type: '{value}'.")
         };
     }
@@ -183,6 +189,7 @@ internal sealed class
             DocumentType.Encrypted => "encrypted",
             DocumentType.Compressed => "compressed",
             DocumentType.Signed => "signed",
+            DocumentType.Uploaded => "uploaded",
             _ => throw new JsonException(
                 $"Unknown document type value: '{value}'.")
         };

@@ -79,6 +79,18 @@ internal sealed class PdfGateHttpClient : IDisposable
             .ConfigureAwait(false), url, cancellationToken);
     }
 
+    public async Task<string> PostAsMultipartAsync(string url,
+        MultipartFormDataContent content,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+
+        return await TryPost(
+            async () => await _httpClient
+                .PostAsync(url, content, cancellationToken)
+                .ConfigureAwait(false), url, cancellationToken);
+    }
+
     public async Task<Stream> GetStreamAsync(string url,
         CancellationToken cancellationToken = default)
     {
