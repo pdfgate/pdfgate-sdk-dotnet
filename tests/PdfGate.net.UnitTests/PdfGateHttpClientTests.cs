@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using System.Text.Json;
 
 using PdfGate.net.Models;
@@ -65,6 +66,50 @@ public sealed class PdfGateHttpClientTests
             client.PostAsJsonAsync("v1/generate/pdf",
                 new GeneratePdfRequest { Html = "<p>hello</p>" },
                 cts.Token));
+    }
+
+    [Fact]
+    public async Task
+        GetStreamAsync_WhenResponseIsNonSuccess_ThrowsPdfGateExceptionWithStatusBodyAndEndpoint()
+    {
+        const string endpoint = "file/somedocumentid";
+        const string responseBody = "{\"error\":\"not found\"}";
+
+        using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
+            new HttpResponseMessage(HttpStatusCode.NotFound)
+            {
+                Content = new StringContent(responseBody)
+            }));
+
+        var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
+            client.GetStreamAsync(endpoint,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
+        Assert.Equal(responseBody, exception.ResponseBody);
+        Assert.Contains(endpoint, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task
+        GetStreamAsync_WhenResponseIsSuccess_ReturnsStreamWithAllContent()
+    {
+        const string endpoint = "file/somedocumentid";
+        var expectedBytes = Encoding.UTF8.GetBytes("pdf content");
+
+        using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
+            new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(expectedBytes)
+            }));
+
+        await using Stream stream = await client.GetStreamAsync(endpoint,
+            TestContext.Current.CancellationToken);
+        using var actualContent = new MemoryStream();
+        await stream.CopyToAsync(actualContent,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(expectedBytes, actualContent.ToArray());
     }
 
     private static PdfGateHttpClient CreateClient(

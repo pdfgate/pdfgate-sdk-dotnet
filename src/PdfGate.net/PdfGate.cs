@@ -102,4 +102,23 @@ public sealed class PdfGate : IDisposable
 
         return _responseParser.Parse(content, url);
     }
+
+    /// <summary>
+    ///     Gets a file by its ID
+    /// </summary>
+    /// <param name="request">GetFile request payload with the ID of the document to download.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A stream to the file's content.</returns>
+    public async Task<Stream> GetFileAsync(
+        GetFileRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = $"file/{request.DocumentId}";
+        Stream content =
+            await _httpClient.GetStreamAsync(url, cancellationToken);
+
+        return content;
+    }
 }
