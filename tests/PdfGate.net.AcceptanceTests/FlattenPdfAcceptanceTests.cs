@@ -51,6 +51,35 @@ public sealed class
     }
 
     /// <summary>
+    ///     Calls the flatten PDF method by document ID and verifies completion status.
+    /// </summary>
+    [Fact]
+    public void FlattenPdf_ByDocumentId_ReturnsCompletedStatus()
+    {
+        PdfGate client = _fixture.GetClientOrSkip();
+
+        var generateRequest = new GeneratePdfRequest
+        {
+            Html =
+                "<html><body><h1>Flatten Acceptance Test</h1><input type='text' value='hello' /></body></html>",
+            EnableFormFields = true
+        };
+
+        PdfGateDocumentResponse source = client.GeneratePdf(
+            generateRequest,
+            TestContext.Current.CancellationToken);
+
+        var flattenRequest = new FlattenPdfRequest { DocumentId = source.Id };
+
+        PdfGateDocumentResponse flattened = client.FlattenPdf(
+            flattenRequest,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(DocumentStatus.Completed, flattened.Status);
+        Assert.Equal(DocumentType.Flattened, flattened.Type);
+    }
+
+    /// <summary>
     ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
     /// </summary>
     [Fact]
@@ -63,6 +92,26 @@ public sealed class
 
         var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
             client.FlattenPdfAsync(request,
+                TestContext.Current.CancellationToken));
+
+        Assert.NotNull(exception.StatusCode);
+        Assert.False(string.IsNullOrWhiteSpace(exception.ResponseBody));
+        Assert.Contains(exception.ResponseBody!, exception.Message,
+            StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
+    /// </summary>
+    [Fact]
+    public void FlattenPdf_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
+    {
+        PdfGate client = _fixture.GetClientOrSkip();
+
+        var request = new FlattenPdfRequest();
+
+        var exception = Assert.Throws<PdfGateException>(() =>
+            client.FlattenPdf(request,
                 TestContext.Current.CancellationToken));
 
         Assert.NotNull(exception.StatusCode);

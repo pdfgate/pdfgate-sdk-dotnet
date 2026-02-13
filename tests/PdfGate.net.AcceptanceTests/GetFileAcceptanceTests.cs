@@ -47,4 +47,28 @@ public sealed class
         for (var i = 0; i < pdfSignature.Length; i++)
             Assert.Equal(buffer[i], pdfSignature[i]);
     }
+
+    /// <summary>
+    ///     Calls the GetFile endpoint and checks response is a PDF
+    /// </summary>
+    [Fact]
+    public void GetFile_ReturnsStreamWithFile()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse document =
+            _documentFixture.GetDocumentOrSkip(client);
+        var getFileRequest = new GetFileRequest { DocumentId = document.Id };
+
+        Stream fileResponse = client.GetFile(getFileRequest,
+            TestContext.Current.CancellationToken);
+
+        var pdfSignature = Encoding.ASCII.GetBytes("%PDF");
+        var buffer = new byte[pdfSignature.Length];
+        var bytesRead = fileResponse.Read(buffer, 0, buffer.Length);
+
+        Assert.Equal(bytesRead, pdfSignature.Length);
+
+        for (var i = 0; i < pdfSignature.Length; i++)
+            Assert.Equal(buffer[i], pdfSignature[i]);
+    }
 }

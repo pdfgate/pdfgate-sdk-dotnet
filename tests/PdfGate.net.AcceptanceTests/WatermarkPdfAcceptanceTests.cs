@@ -64,6 +64,41 @@ public sealed class
     }
 
     /// <summary>
+    ///     Applies a text watermark by existing document ID and verifies completion status.
+    /// </summary>
+    [Fact]
+    public void WatermarkPdf_ByDocumentIdWithText_ReturnsCompletedStatus()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse source =
+            _documentFixture.GetDocumentOrSkip(client);
+        PdfGateFile fontFile = CreateFontFileOrSkip();
+
+        var request = new WatermarkPdfRequest
+        {
+            DocumentId = source.Id,
+            Type = WatermarkPdfType.Text,
+            Text = "CONFIDENTIAL",
+            FontFile = fontFile,
+            Font = WatermarkPdfFont.HelveticaBold,
+            FontSize = 30,
+            FontColor = "rgb(156, 50, 168)",
+            Opacity = 0.2,
+            XPosition = 120,
+            YPosition = 180,
+            Rotate = 30
+        };
+
+        PdfGateDocumentResponse watermarked = client.WatermarkPdf(
+            request,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(DocumentStatus.Completed, watermarked.Status);
+        Assert.Equal(DocumentType.Watermarked, watermarked.Type);
+        Assert.Equal(source.Id, watermarked.DerivedFrom);
+    }
+
+    /// <summary>
     ///     Applies an image watermark by existing document ID and verifies completion status.
     /// </summary>
     [Fact]
@@ -102,6 +137,43 @@ public sealed class
     }
 
     /// <summary>
+    ///     Applies an image watermark by existing document ID and verifies completion status.
+    /// </summary>
+    [Fact]
+    public void WatermarkPdf_ByDocumentIdWithImage_ReturnsCompletedStatus()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse source =
+            _documentFixture.GetDocumentOrSkip(client);
+
+        var request = new WatermarkPdfRequest
+        {
+            DocumentId = source.Id,
+            Type = WatermarkPdfType.Image,
+            Watermark = new PdfGateFile
+            {
+                Name = "watermark.png",
+                Type = "image/png",
+                Content = new MemoryStream(WatermarkImage)
+            },
+            Opacity = 0.4,
+            XPosition = 72,
+            YPosition = 120,
+            ImageWidth = 48,
+            ImageHeight = 48,
+            Rotate = 25
+        };
+
+        PdfGateDocumentResponse watermarked = client.WatermarkPdf(
+            request,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(DocumentStatus.Completed, watermarked.Status);
+        Assert.Equal(DocumentType.Watermarked, watermarked.Type);
+        Assert.Equal(source.Id, watermarked.DerivedFrom);
+    }
+
+    /// <summary>
     ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
     /// </summary>
     [Fact]
@@ -118,6 +190,30 @@ public sealed class
 
         var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
             client.WatermarkPdfAsync(request,
+                TestContext.Current.CancellationToken));
+
+        Assert.NotNull(exception.StatusCode);
+        Assert.False(string.IsNullOrWhiteSpace(exception.ResponseBody));
+        Assert.Contains(exception.ResponseBody!, exception.Message,
+            StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
+    /// </summary>
+    [Fact]
+    public void WatermarkPdf_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        var request = new WatermarkPdfRequest
+        {
+            DocumentId = "invalid-id",
+            Type = WatermarkPdfType.Text,
+            Text = "CONFIDENTIAL"
+        };
+
+        var exception = Assert.Throws<PdfGateException>(() =>
+            client.WatermarkPdf(request,
                 TestContext.Current.CancellationToken));
 
         Assert.NotNull(exception.StatusCode);

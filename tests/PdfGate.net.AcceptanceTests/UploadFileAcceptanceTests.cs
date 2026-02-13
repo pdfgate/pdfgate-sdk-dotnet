@@ -44,6 +44,28 @@ public class
     }
 
     /// <summary>
+    ///     Uploads a file
+    /// </summary>
+    [Fact]
+    public void UploadFile_UploadsFile()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse document =
+            _documentFixture.GetDocumentOrSkip(client);
+        var getFileRequest = new GetFileRequest { DocumentId = document.Id };
+        Stream fileResponse = client.GetFile(getFileRequest,
+            TestContext.Current.CancellationToken);
+
+        var request = new UploadFileRequest { Content = fileResponse };
+        PdfGateDocumentResponse uploadedResponse =
+            client.UploadFile(request,
+                TestContext.Current.CancellationToken);
+
+        Assert.Equal(DocumentStatus.Completed, uploadedResponse.Status);
+        Assert.Equal(DocumentType.Uploaded, uploadedResponse.Type);
+    }
+
+    /// <summary>
     ///     Uploads a file by URL
     /// </summary>
     [Fact(Skip = "The HTTP API is failing currently for this case")]
@@ -58,6 +80,27 @@ public class
         };
         PdfGateDocumentResponse uploadedResponse =
             await client.UploadFileAsync(request,
+                TestContext.Current.CancellationToken);
+
+        Assert.Equal(DocumentStatus.Completed, uploadedResponse.Status);
+        Assert.Equal(DocumentType.Uploaded, uploadedResponse.Type);
+    }
+
+    /// <summary>
+    ///     Uploads a file by URL
+    /// </summary>
+    [Fact(Skip = "The HTTP API is failing currently for this case")]
+    public void UploadFile_UploadsFileByUrl()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        var request = new UploadFileRequest
+        {
+            Url =
+                new Uri(
+                    "https://www.rd.usda.gov/sites/default/files/pdf-sample_0.pdf")
+        };
+        PdfGateDocumentResponse uploadedResponse =
+            client.UploadFile(request,
                 TestContext.Current.CancellationToken);
 
         Assert.Equal(DocumentStatus.Completed, uploadedResponse.Status);

@@ -30,14 +30,16 @@ public sealed class PdfGate : IDisposable
     private readonly PdfGateHttpClient _httpClient;
     private readonly PdfGateResponseParser _responseParser;
 
-    public PdfGate(string apiKey, int maxConcurrency)
+    internal PdfGate(string apiKey, HttpMessageHandler httpMessageHandler)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("An API key is required.");
 
+        ArgumentNullException.ThrowIfNull(httpMessageHandler);
+
         Uri baseAddress = GetBaseUriFromApiKey(apiKey);
-        _httpClient = new PdfGateHttpClient(apiKey, baseAddress, JsonOptions,
-            maxConcurrency);
+        _httpClient = new PdfGateHttpClient(apiKey, baseAddress,
+            httpMessageHandler, JsonOptions);
         _responseParser = new PdfGateResponseParser(JsonOptions);
     }
 
@@ -78,6 +80,38 @@ public sealed class PdfGate : IDisposable
     ///     Generates a PDF document from HTML or URL input.
     /// </summary>
     /// <param name="request">Generate PDF request payload.</param>
+    /// <returns>Generated document metadata response.</returns>
+    public PdfGateDocumentResponse GeneratePdf(
+        GeneratePdfRequest request)
+    {
+        return GeneratePdf(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Generates a PDF document from HTML or URL input.
+    /// </summary>
+    /// <param name="request">Generate PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Generated document metadata response.</returns>
+    public PdfGateDocumentResponse GeneratePdf(
+        GeneratePdfRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.GeneratePdf;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url,
+            jsonRequest,
+            cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Generates a PDF document from HTML or URL input.
+    /// </summary>
+    /// <param name="request">Generate PDF request payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Generated document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> GeneratePdfAsync(
@@ -100,6 +134,37 @@ public sealed class PdfGate : IDisposable
     ///     Flattens a PDF and returns document metadata.
     /// </summary>
     /// <param name="request">Flatten PDF request payload.</param>
+    /// <returns>Flattened document metadata response.</returns>
+    public PdfGateDocumentResponse FlattenPdf(
+        FlattenPdfRequest request)
+    {
+        return FlattenPdf(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Flattens a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Flatten PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Flattened document metadata response.</returns>
+    public PdfGateDocumentResponse FlattenPdf(
+        FlattenPdfRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.FlattenPdf;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest,
+            cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Flattens a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Flatten PDF request payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Flattened document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> FlattenPdfAsync(
@@ -112,6 +177,40 @@ public sealed class PdfGate : IDisposable
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
             cancellationToken).ConfigureAwait(false);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Applies a watermark to a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Watermark PDF request payload.</param>
+    /// <returns>Watermarked document metadata response.</returns>
+    public PdfGateDocumentResponse WatermarkPdf(
+        WatermarkPdfRequest request)
+    {
+        return WatermarkPdf(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Applies a watermark to a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Watermark PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Watermarked document metadata response.</returns>
+    public PdfGateDocumentResponse WatermarkPdf(
+        WatermarkPdfRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.WatermarkPdf;
+        var builder = new WatermarkPdfMultipartRequestBuilder(request,
+            JsonOptions);
+        MultipartFormDataContent form =
+            builder.Build();
+        var content = _httpClient.PostAsMultipart(url, form,
+            cancellationToken);
 
         return _responseParser.Parse(content, url);
     }
@@ -143,6 +242,37 @@ public sealed class PdfGate : IDisposable
     ///     Protects a PDF and returns document metadata.
     /// </summary>
     /// <param name="request">Protect PDF request payload.</param>
+    /// <returns>Protected document metadata response.</returns>
+    public PdfGateDocumentResponse ProtectPdf(
+        ProtectPdfRequest request)
+    {
+        return ProtectPdf(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Protects a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Protect PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Protected document metadata response.</returns>
+    public PdfGateDocumentResponse ProtectPdf(
+        ProtectPdfRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.ProtectPdf;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest,
+            cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Protects a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Protect PDF request payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Protected document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> ProtectPdfAsync(
@@ -155,6 +285,37 @@ public sealed class PdfGate : IDisposable
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
             cancellationToken).ConfigureAwait(false);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Compresses a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Compress PDF request payload.</param>
+    /// <returns>Compressed document metadata response.</returns>
+    public PdfGateDocumentResponse CompressPdf(
+        CompressPdfRequest request)
+    {
+        return CompressPdf(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Compresses a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Compress PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Compressed document metadata response.</returns>
+    public PdfGateDocumentResponse CompressPdf(
+        CompressPdfRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.CompressPdf;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest,
+            cancellationToken);
 
         return _responseParser.Parse(content, url);
     }
@@ -183,6 +344,37 @@ public sealed class PdfGate : IDisposable
     ///     Extracts PDF form fields and their values.
     /// </summary>
     /// <param name="request">Extract PDF form data request payload.</param>
+    /// <returns>JSON object containing extracted form field values.</returns>
+    public JsonElement ExtractPdfFormData(
+        ExtractPdfFormDataRequest request)
+    {
+        return ExtractPdfFormData(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Extracts PDF form fields and their values.
+    /// </summary>
+    /// <param name="request">Extract PDF form data request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>JSON object containing extracted form field values.</returns>
+    public JsonElement ExtractPdfFormData(
+        ExtractPdfFormDataRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.ExtractPdfFormData;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest,
+            cancellationToken);
+
+        return _responseParser.ParseObject(content, url);
+    }
+
+    /// <summary>
+    ///     Extracts PDF form fields and their values.
+    /// </summary>
+    /// <param name="request">Extract PDF form data request payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>JSON object containing extracted form field values.</returns>
     public async Task<JsonElement> ExtractPdfFormDataAsync(
@@ -203,6 +395,37 @@ public sealed class PdfGate : IDisposable
     ///     Gets metadata for a document by ID.
     /// </summary>
     /// <param name="request">GetDocument request payload with the ID of the document to retrieve.</param>
+    /// <returns>Document metadata.</returns>
+    public PdfGateDocumentResponse GetDocument(
+        GetDocumentRequest request)
+    {
+        return GetDocument(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Gets metadata for a document by ID.
+    /// </summary>
+    /// <param name="request">GetDocument request payload with the ID of the document to retrieve.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Document metadata.</returns>
+    public PdfGateDocumentResponse GetDocument(
+        GetDocumentRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.GetDocument(request.DocumentId,
+            request.PreSignedUrlExpiresIn);
+
+        var content = _httpClient.Get(url, cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Gets metadata for a document by ID.
+    /// </summary>
+    /// <param name="request">GetDocument request payload with the ID of the document to retrieve.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Document metadata.</returns>
     public async Task<PdfGateDocumentResponse> GetDocumentAsync(
@@ -214,9 +437,40 @@ public sealed class PdfGate : IDisposable
         var url = ApiRoutes.GetDocument(request.DocumentId,
             request.PreSignedUrlExpiresIn);
 
-        var content = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+        var content = await _httpClient.GetAsync(url, cancellationToken)
+            .ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Gets a file by its ID
+    /// </summary>
+    /// <param name="request">GetFile request payload with the ID of the document to download.</param>
+    /// <returns>A stream to the file's content.</returns>
+    public Stream GetFile(
+        GetFileRequest request)
+    {
+        return GetFile(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Gets a file by its ID
+    /// </summary>
+    /// <param name="request">GetFile request payload with the ID of the document to download.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A stream to the file's content.</returns>
+    public Stream GetFile(
+        GetFileRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.GetFile(request.DocumentId);
+        Stream content =
+            _httpClient.GetStream(url, cancellationToken);
+
+        return content;
     }
 
     /// <summary>
@@ -233,9 +487,49 @@ public sealed class PdfGate : IDisposable
 
         var url = ApiRoutes.GetFile(request.DocumentId);
         Stream content =
-            await _httpClient.GetStreamAsync(url, cancellationToken).ConfigureAwait(false);
+            await _httpClient.GetStreamAsync(url, cancellationToken)
+                .ConfigureAwait(false);
 
         return content;
+    }
+
+    /// <summary>
+    ///     Upload a PDF file so you can apply any transformation to it.
+    ///     The stream passed in the request is owned by the caller so it must
+    ///     be disposed by the caller.
+    /// </summary>
+    /// <param name="request">UploadFile request payload holds the file.</param>
+    /// <returns>The uploaded document metadata to use to operate on it</returns>
+    public PdfGateDocumentResponse UploadFile(
+        UploadFileRequest request)
+    {
+        return UploadFile(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Upload a PDF file so you can apply any transformation to it.
+    ///     The stream passed in the request is owned by the caller so it must
+    ///     be disposed by the caller.
+    /// </summary>
+    /// <param name="request">UploadFile request payload holds the file.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The uploaded document metadata to use to operate on it</returns>
+    public PdfGateDocumentResponse UploadFile(
+        UploadFileRequest request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = ApiRoutes.UploadFile;
+        var builder = new UploadFileMultipartRequestBuilder(request,
+            JsonOptions);
+        MultipartFormDataContent form = builder.Build();
+
+        var response =
+            _httpClient.PostAsMultipart(url, form,
+                cancellationToken);
+
+        return _responseParser.Parse(response, url);
     }
 
     /// <summary>

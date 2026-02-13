@@ -44,6 +44,25 @@ public sealed class
     }
 
     /// <summary>
+    ///     Extracts form data by existing document ID.
+    /// </summary>
+    [Fact]
+    public void ExtractPdfFormData_ByDocumentId_ReturnsFieldValues()
+    {
+        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateDocumentResponse source = CreateDocumentWithForm(client);
+
+        var request =
+            new ExtractPdfFormDataRequest { DocumentId = source.Id };
+
+        JsonElement response = client.ExtractPdfFormData(request,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal("John", response.GetProperty("first_name").GetString());
+        Assert.Equal("Doe", response.GetProperty("last_name").GetString());
+    }
+
+    /// <summary>
     ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
     /// </summary>
     [Fact]
@@ -65,6 +84,27 @@ public sealed class
             StringComparison.Ordinal);
     }
 
+    /// <summary>
+    ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
+    /// </summary>
+    [Fact]
+    public void ExtractPdfFormData_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
+    {
+        PdfGate client = _fixture.GetClientOrSkip();
+
+        var request =
+            new ExtractPdfFormDataRequest { DocumentId = "invalid-id" };
+
+        var exception = Assert.Throws<PdfGateException>(() =>
+            client.ExtractPdfFormData(request,
+                TestContext.Current.CancellationToken));
+
+        Assert.NotNull(exception.StatusCode);
+        Assert.False(string.IsNullOrWhiteSpace(exception.ResponseBody));
+        Assert.Contains(exception.ResponseBody!, exception.Message,
+            StringComparison.Ordinal);
+    }
+
     private static async Task<PdfGateDocumentResponse> CreateDocumentWithFormAsync(
         PdfGate client)
     {
@@ -76,6 +116,19 @@ public sealed class
         };
 
         return await client.GeneratePdfAsync(generateRequest,
+            TestContext.Current.CancellationToken);
+    }
+
+    private static PdfGateDocumentResponse CreateDocumentWithForm(PdfGate client)
+    {
+        var generateRequest = new GeneratePdfRequest
+        {
+            Html =
+                "<html><body><form><input type='text' name='first_name' value='John' /><input type='text' name='last_name' value='Doe' /></form></body></html>",
+            EnableFormFields = true
+        };
+
+        return client.GeneratePdf(generateRequest,
             TestContext.Current.CancellationToken);
     }
 }

@@ -18,13 +18,6 @@ internal sealed class PdfGateHttpClient : IDisposable
     {
     }
 
-    public PdfGateHttpClient(string apiKey, Uri baseAddress,
-        JsonSerializerOptions jsonOptions, int maxConcurrency) : this(apiKey,
-        baseAddress,
-        BuildHttpClientWithMaxConcurrency(maxConcurrency), jsonOptions)
-    {
-    }
-
     internal PdfGateHttpClient(string apiKey, Uri baseAddress,
         HttpMessageHandler httpMessageHandler,
         JsonSerializerOptions jsonOptions)
@@ -52,31 +45,41 @@ internal sealed class PdfGateHttpClient : IDisposable
         _httpClient.Dispose();
     }
 
-    private static HttpClient BuildHttpClientWithMaxConcurrency(
-        int maxConcurrency)
-    {
-        var handler = new SocketsHttpHandler
-        {
-            MaxConnectionsPerServer =
-                maxConcurrency // max concurrent connections per host
-        };
-
-        var httpClient = new HttpClient(handler);
-
-        return httpClient;
-    }
 
     public async Task<string> PostAsJsonAsync(string url,
         string request,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        using var content =
-            new StringContent(request, Encoding.UTF8, "application/json");
 
-        return await TrySendRequest(async () => await _httpClient
-            .PostAsync(url, content, cancellationToken)
-            .ConfigureAwait(false), url, cancellationToken).ConfigureAwait(false);
+        return await TrySendRequest(async () =>
+            {
+                using var content =
+                    new StringContent(request, Encoding.UTF8,
+                        "application/json");
+                return await _httpClient
+                    .PostAsync(url, content, cancellationToken)
+                    .ConfigureAwait(false);
+            }, url, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public string PostAsJson(string url,
+        string request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        return TrySendRequest(() =>
+        {
+            using var content =
+                new StringContent(request, Encoding.UTF8,
+                    "application/json");
+            using var requestMessage =
+                new HttpRequestMessage(HttpMethod.Post, url);
+            requestMessage.Content = content;
+            return _httpClient.Send(requestMessage, cancellationToken);
+        }, url, cancellationToken);
     }
 
     public async Task<string> PostAsMultipartAsync(string url,
@@ -86,9 +89,25 @@ internal sealed class PdfGateHttpClient : IDisposable
         ArgumentNullException.ThrowIfNull(content);
 
         return await TrySendRequest(
-            async () => await _httpClient
-                .PostAsync(url, content, cancellationToken)
-                .ConfigureAwait(false), url, cancellationToken).ConfigureAwait(false);
+                async () => await _httpClient
+                    .PostAsync(url, content, cancellationToken)
+                    .ConfigureAwait(false), url, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public string PostAsMultipart(string url,
+        MultipartFormDataContent content,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+
+        return TrySendRequest(() =>
+        {
+            using var requestMessage =
+                new HttpRequestMessage(HttpMethod.Post, url);
+            requestMessage.Content = content;
+            return _httpClient.Send(requestMessage, cancellationToken);
+        }, url, cancellationToken);
     }
 
     public async Task<Stream> GetStreamAsync(string url,
@@ -99,7 +118,8 @@ internal sealed class PdfGateHttpClient : IDisposable
         try
         {
             using HttpResponseMessage response =
-                await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
+                await _httpClient.GetAsync(url, cancellationToken)
+                    .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -136,9 +156,65 @@ internal sealed class PdfGateHttpClient : IDisposable
         ArgumentNullException.ThrowIfNull(url);
 
         return await TrySendRequest(
-            async () => await _httpClient
-                .GetAsync(url, cancellationToken)
-                .ConfigureAwait(false), url, cancellationToken).ConfigureAwait(false);
+                async () => await _httpClient
+                    .GetAsync(url, cancellationToken)
+                    .ConfigureAwait(false), url, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public string Get(string url,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(url);
+
+        return TrySendRequest(
+            () =>
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get,
+                    url);
+                return _httpClient.Send(request, cancellationToken);
+            },
+            url, cancellationToken);
+    }
+
+    public Stream GetStream(string url,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(url);
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using HttpResponseMessage response =
+                _httpClient.Send(request, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = ReadContentAsString(response.Content,
+                    cancellationToken);
+                throw PdfGateException.FromHttpError(response.StatusCode,
+                    url, errorResponse);
+            }
+
+            var byteArrayContent = ReadContentAsByteArray(response.Content,
+                cancellationToken);
+            Stream content = new MemoryStream(byteArrayContent, false);
+
+            return content;
+        }
+        catch (PdfGateException)
+        {
+            throw;
+        }
+        catch (TaskCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new PdfGateException(
+                $"Failed to call endpoint '{url}'.", ex);
+        }
     }
 
     private async Task<string> TrySendRequest(
@@ -148,7 +224,8 @@ internal sealed class PdfGateHttpClient : IDisposable
     {
         try
         {
-            using HttpResponseMessage response = await sendRequest().ConfigureAwait(false);
+            using HttpResponseMessage response =
+                await sendRequest().ConfigureAwait(false);
 
             var content = await response.Content
                 .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
@@ -172,5 +249,57 @@ internal sealed class PdfGateHttpClient : IDisposable
             throw new PdfGateException(
                 $"Failed to call endpoint '{url}'.", ex);
         }
+    }
+
+    private string TrySendRequest(
+        Func<HttpResponseMessage> sendRequest,
+        string url,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using HttpResponseMessage response = sendRequest();
+            var content = ReadContentAsString(response.Content,
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                throw PdfGateException.FromHttpError(response.StatusCode,
+                    url, content);
+
+            return content;
+        }
+        catch (PdfGateException)
+        {
+            throw;
+        }
+        catch (TaskCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new PdfGateException(
+                $"Failed to call endpoint '{url}'.", ex);
+        }
+    }
+
+    private static string ReadContentAsString(HttpContent content,
+        CancellationToken cancellationToken = default)
+    {
+        using Stream stream = content.ReadAsStream(cancellationToken);
+        using var reader = new StreamReader(stream, Encoding.UTF8, true, -1,
+            false);
+
+        return reader.ReadToEnd();
+    }
+
+    private static byte[] ReadContentAsByteArray(HttpContent content,
+        CancellationToken cancellationToken = default)
+    {
+        using Stream stream = content.ReadAsStream(cancellationToken);
+        using var memory = new MemoryStream();
+        stream.CopyTo(memory);
+
+        return memory.ToArray();
     }
 }

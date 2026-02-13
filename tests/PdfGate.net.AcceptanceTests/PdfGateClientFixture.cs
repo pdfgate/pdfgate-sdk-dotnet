@@ -18,7 +18,8 @@ public static class AcceptanceTestCollection
 /// </summary>
 [CollectionDefinition(AcceptanceTestCollection.Name)]
 public sealed class
-    AcceptanceTestCollectionDefinition : ICollectionFixture<PdfGateClientFixture>
+    AcceptanceTestCollectionDefinition : ICollectionFixture<
+    PdfGateClientFixture>
 {
 }
 
@@ -39,7 +40,15 @@ public sealed class PdfGateClientFixture : IDisposable
     {
         var apiKey = Environment.GetEnvironmentVariable("PDFGATE_API_KEY");
         if (!string.IsNullOrWhiteSpace(apiKey))
-            _client = new PdfGate(apiKey, 2);
+        {
+            var socketsHandler = new SocketsHttpHandler
+            {
+                MaxConnectionsPerServer = 2
+            };
+            var throttledHandler = new AcceptanceTestRateLimitedHandler(
+                socketsHandler);
+            _client = new PdfGate(apiKey, throttledHandler);
+        }
     }
 
     /// <inheritdoc />

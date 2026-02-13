@@ -77,11 +77,67 @@ public sealed class
             request.UserPassword!, request.OwnerPassword!);
     }
 
+    /// <summary>
+    ///     Protects a PDF with all request values using AES-256 and verifies the resulting file requires one of the set
+    ///     passwords.
+    /// </summary>
+    [Fact]
+    public void
+        ProtectPdf_ByDocumentIdWithAllRequestValuesAes256_ReturnsEncryptedDocumentAndEncryptedFile()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse source =
+            _documentFixture.GetDocumentOrSkip(client);
+
+        var request = new ProtectPdfRequest
+        {
+            DocumentId = source.Id,
+            Algorithm = ProtectPdfEncryptionAlgorithm.Aes256,
+            UserPassword = Guid.NewGuid().ToString("N"),
+            OwnerPassword = Guid.NewGuid().ToString("N"),
+            DisablePrint = true,
+            DisableCopy = true,
+            DisableEditing = true,
+            EncryptMetadata = true,
+            PreSignedUrlExpiresIn = 3600,
+            Metadata = new
+            {
+                author = "acceptance-test", source = "protect-aes256"
+            }
+        };
+
+        PdfGateDocumentResponse protectedDocument =
+            client.ProtectPdf(
+                request,
+                TestContext.Current.CancellationToken);
+
+        Assert.Equal(DocumentStatus.Completed, protectedDocument.Status);
+        Assert.Equal(DocumentType.Encrypted, protectedDocument.Type);
+        Assert.Equal(source.Id, protectedDocument.DerivedFrom);
+
+        Stream protectedFileStream = client.GetFile(
+            new GetFileRequest { DocumentId = protectedDocument.Id },
+            TestContext.Current.CancellationToken);
+        var protectedFileBytes = ReadAllBytes(protectedFileStream,
+            TestContext.Current.CancellationToken);
+
+        AssertProtectedPdfRequiresPassword(protectedFileBytes,
+            request.UserPassword!, request.OwnerPassword!);
+    }
+
     private static async Task<byte[]> ReadAllBytesAsync(Stream stream,
         CancellationToken cancellationToken)
     {
         await using var copy = new MemoryStream();
         await stream.CopyToAsync(copy, cancellationToken);
+        return copy.ToArray();
+    }
+
+    private static byte[] ReadAllBytes(Stream stream,
+        CancellationToken cancellationToken)
+    {
+        using var copy = new MemoryStream();
+        stream.CopyTo(copy);
         return copy.ToArray();
     }
 

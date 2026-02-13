@@ -155,10 +155,86 @@ public sealed class PdfGateHttpClientTests
         Assert.Equal(responseBody, content);
     }
 
+    [Fact]
+    public void
+        PostAsJson_WhenResponseIsNonSuccess_ThrowsPdfGateExceptionWithStatusBodyAndEndpoint()
+    {
+        const string endpoint = ApiRoutes.GeneratePdf;
+        const string responseBody = "{\"error\":\"invalid input\"}";
+
+        using PdfGateHttpClient client = CreateClientSync(_ =>
+            new HttpResponseMessage(HttpStatusCode.UnprocessableEntity)
+            {
+                Content = new StringContent(responseBody)
+            });
+
+        var request = new GeneratePdfRequest { Html = "<p>hello</p>" };
+
+        var exception = Assert.Throws<PdfGateException>(() =>
+            client.PostAsJson(endpoint,
+                JsonSerializer.Serialize(request),
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, exception.StatusCode);
+        Assert.Equal(responseBody, exception.ResponseBody);
+        Assert.Contains(endpoint, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Get_WhenResponseIsSuccess_ReturnsStringContent()
+    {
+        var endpoint = ApiRoutes.GetDocument("somedocumentid");
+        const string responseBody = "{\"id\":\"doc_123\"}";
+
+        using PdfGateHttpClient client = CreateClientSync(_ =>
+            new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(responseBody)
+            });
+
+        string content = client.Get(endpoint,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(responseBody, content);
+    }
+
+    [Fact]
+    public void GetStream_WhenResponseIsSuccess_ReturnsStreamWithAllContent()
+    {
+        var endpoint = ApiRoutes.GetFile("somedocumentid");
+        var expectedBytes = Encoding.UTF8.GetBytes("pdf content");
+
+        using PdfGateHttpClient client = CreateClientSync(_ =>
+            new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(expectedBytes)
+            });
+
+        using Stream stream = client.GetStream(endpoint,
+            TestContext.Current.CancellationToken);
+        using var actualContent = new MemoryStream();
+        stream.CopyTo(actualContent);
+
+        Assert.Equal(expectedBytes, actualContent.ToArray());
+    }
+
     private static PdfGateHttpClient CreateClient(
         Func<HttpRequestMessage, Task<HttpResponseMessage>> sendAsync)
     {
-        var handler = new DelegateHttpMessageHandler(sendAsync);
+        var handler = new DelegateHttpMessageHandler(sendAsync,
+            request => sendAsync(request).GetAwaiter().GetResult());
+        return new PdfGateHttpClient(
+            "live_test_key",
+            new Uri("https://api.pdfgate.com/"),
+            handler, new JsonSerializerOptions());
+    }
+
+    private static PdfGateHttpClient CreateClientSync(
+        Func<HttpRequestMessage, HttpResponseMessage> send)
+    {
+        var handler = new DelegateHttpMessageHandler(
+            request => Task.FromResult(send(request)),
+            send);
         return new PdfGateHttpClient(
             "live_test_key",
             new Uri("https://api.pdfgate.com/"),
@@ -166,9 +242,17 @@ public sealed class PdfGateHttpClientTests
     }
 
     private sealed class DelegateHttpMessageHandler(
-        Func<HttpRequestMessage, Task<HttpResponseMessage>> sendAsync)
+        Func<HttpRequestMessage, Task<HttpResponseMessage>> sendAsync,
+        Func<HttpRequestMessage, HttpResponseMessage> send)
         : HttpMessageHandler
     {
+        protected override HttpResponseMessage Send(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            return send(request);
+        }
+
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)

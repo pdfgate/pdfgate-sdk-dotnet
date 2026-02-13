@@ -43,4 +43,27 @@ public sealed class
         Assert.Equal(source.Id, response.Id);
         Assert.Equal(DocumentStatus.Completed, response.Status);
     }
+
+    /// <summary>
+    ///     Calls the GetDocument endpoint and verifies the fixture document is returned as completed.
+    /// </summary>
+    [Fact]
+    public void GetDocument_ReturnsFixtureDocumentWithCompletedStatus()
+    {
+        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse source =
+            _documentFixture.GetDocumentOrSkip(client);
+
+        var request = new GetDocumentRequest
+        {
+            DocumentId = source.Id
+        };
+
+        PdfGateDocumentResponse response = client.GetDocument(
+            request,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(source.Id, response.Id);
+        Assert.Equal(DocumentStatus.Completed, response.Status);
+    }
 }
