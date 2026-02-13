@@ -228,6 +228,26 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
+    ///     Protects a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Protect PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Protected document metadata response.</returns>
+    public async Task<PdfGateDocumentResponse> ProtectPdfAsync(
+        ProtectPdfRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = "protect/pdf";
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
+            cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
     ///     Extracts PDF form fields and their values.
     /// </summary>
     /// <param name="request">Extract PDF form data request payload.</param>
