@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace PdfGate.net.Models;
 
@@ -56,7 +55,6 @@ public sealed record WatermarkPdfRequest
     /// <summary>
     ///     Text watermark font.
     /// </summary>
-    [JsonConverter(typeof(NullableWatermarkPdfFontJsonConverter))]
     public WatermarkPdfFont? Font
     {
         get;
@@ -264,46 +262,5 @@ internal static class WatermarkPdfFontExtensions
             WatermarkPdfFont.CourierBoldOblique => "courier-boldoblique",
             _ => throw new JsonException($"Unknown watermark font: '{font}'.")
         };
-    }
-}
-
-internal sealed class NullableWatermarkPdfFontJsonConverter
-    : JsonConverter<WatermarkPdfFont?>
-{
-    public override WatermarkPdfFont? Read(ref Utf8JsonReader reader,
-        Type typeToConvert, JsonSerializerOptions options)
-    {
-        if (reader.TokenType == JsonTokenType.Null)
-            return null;
-
-        var value = reader.GetString();
-        return value switch
-        {
-            "times-roman" => WatermarkPdfFont.TimesRoman,
-            "times-bold" => WatermarkPdfFont.TimesBold,
-            "times-italic" => WatermarkPdfFont.TimesItalic,
-            "times-bolditalic" => WatermarkPdfFont.TimesBoldItalic,
-            "helvetica" => WatermarkPdfFont.Helvetica,
-            "helvetica-bold" => WatermarkPdfFont.HelveticaBold,
-            "helvetica-oblique" => WatermarkPdfFont.HelveticaOblique,
-            "helvetica-boldoblique" => WatermarkPdfFont.HelveticaBoldOblique,
-            "courier" => WatermarkPdfFont.Courier,
-            "courier-bold" => WatermarkPdfFont.CourierBold,
-            "courier-oblique" => WatermarkPdfFont.CourierOblique,
-            "courier-boldoblique" => WatermarkPdfFont.CourierBoldOblique,
-            _ => throw new JsonException($"Unknown watermark font: '{value}'.")
-        };
-    }
-
-    public override void Write(Utf8JsonWriter writer, WatermarkPdfFont? value,
-        JsonSerializerOptions options)
-    {
-        if (value is null)
-        {
-            writer.WriteNullValue();
-            return;
-        }
-
-        writer.WriteStringValue(value.Value.ToApiValue());
     }
 }
