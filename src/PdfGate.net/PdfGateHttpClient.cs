@@ -74,7 +74,7 @@ internal sealed class PdfGateHttpClient : IDisposable
         using var content =
             new StringContent(request, Encoding.UTF8, "application/json");
 
-        return await TryPost(async () => await _httpClient
+        return await TrySendRequest(async () => await _httpClient
             .PostAsync(url, content, cancellationToken)
             .ConfigureAwait(false), url, cancellationToken);
     }
@@ -85,7 +85,7 @@ internal sealed class PdfGateHttpClient : IDisposable
     {
         ArgumentNullException.ThrowIfNull(content);
 
-        return await TryPost(
+        return await TrySendRequest(
             async () => await _httpClient
                 .PostAsync(url, content, cancellationToken)
                 .ConfigureAwait(false), url, cancellationToken);
@@ -135,43 +135,20 @@ internal sealed class PdfGateHttpClient : IDisposable
     {
         ArgumentNullException.ThrowIfNull(url);
 
-        try
-        {
-            using HttpResponseMessage response =
-                await _httpClient.GetAsync(url, cancellationToken);
-
-            var content = await response.Content
-                .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-                throw PdfGateException.FromHttpError(response.StatusCode,
-                    url, content);
-
-            return content;
-        }
-        catch (PdfGateException)
-        {
-            throw;
-        }
-        catch (TaskCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new PdfGateException(
-                $"Failed to call endpoint '{url}'.", ex);
-        }
+        return await TrySendRequest(
+            async () => await _httpClient
+                .GetAsync(url, cancellationToken)
+                .ConfigureAwait(false), url, cancellationToken);
     }
 
-    private async Task<string> TryPost(
-        Func<Task<HttpResponseMessage>> sendPostRequest,
+    private async Task<string> TrySendRequest(
+        Func<Task<HttpResponseMessage>> sendRequest,
         string url,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            using HttpResponseMessage response = await sendPostRequest();
+            using HttpResponseMessage response = await sendRequest();
 
             var content = await response.Content
                 .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
