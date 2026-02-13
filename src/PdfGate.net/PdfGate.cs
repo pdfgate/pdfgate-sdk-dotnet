@@ -248,6 +248,26 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
+    ///     Compresses a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Compress PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Compressed document metadata response.</returns>
+    public async Task<PdfGateDocumentResponse> CompressPdfAsync(
+        CompressPdfRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = "compress/pdf";
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
+            cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
     ///     Extracts PDF form fields and their values.
     /// </summary>
     /// <param name="request">Extract PDF form data request payload.</param>
