@@ -35,4 +35,29 @@ internal sealed class PdfGateResponseParser(JsonSerializerOptions jsonOptions)
                 $"Failed to parse response from endpoint '{url}'.", ex);
         }
     }
+
+    /// <summary>
+    ///     Parse JSON responses into a generic JSON object payload.
+    /// </summary>
+    public JsonElement ParseObject(string content, string url)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+                throw new PdfGateException(
+                    $"The API returned an invalid response for endpoint '{url}'.");
+
+            return document.RootElement.Clone();
+        }
+        catch (PdfGateException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new PdfGateException(
+                $"Failed to parse response from endpoint '{url}'.", ex);
+        }
+    }
 }

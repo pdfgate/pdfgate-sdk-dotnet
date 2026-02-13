@@ -119,6 +119,26 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
+    ///     Extracts PDF form fields and their values.
+    /// </summary>
+    /// <param name="request">Extract PDF form data request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>JSON object containing extracted form field values.</returns>
+    public async Task<JsonElement> ExtractPdfFormDataAsync(
+        ExtractPdfFormDataRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = "forms/extract-data";
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
+            cancellationToken);
+
+        return _responseParser.ParseObject(content, url);
+    }
+
+    /// <summary>
     ///     Gets a file by its ID
     /// </summary>
     /// <param name="request">GetFile request payload with the ID of the document to download.</param>
