@@ -288,6 +288,28 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
+    ///     Gets metadata for a document by ID.
+    /// </summary>
+    /// <param name="request">GetDocument request payload with the ID of the document to retrieve.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Document metadata.</returns>
+    public async Task<PdfGateDocumentResponse> GetDocumentAsync(
+        GetDocumentRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = $"document/{Uri.EscapeDataString(request.DocumentId)}";
+        if (request.PreSignedUrlExpiresIn.HasValue)
+            url +=
+                $"?preSignedUrlExpiresIn={request.PreSignedUrlExpiresIn.Value.ToString(CultureInfo.InvariantCulture)}";
+
+        var content = await _httpClient.GetAsync(url, cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
     ///     Gets a file by its ID
     /// </summary>
     /// <param name="request">GetFile request payload with the ID of the document to download.</param>

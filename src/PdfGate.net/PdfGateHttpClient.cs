@@ -130,6 +130,40 @@ internal sealed class PdfGateHttpClient : IDisposable
         }
     }
 
+    public async Task<string> GetAsync(string url,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(url);
+
+        try
+        {
+            using HttpResponseMessage response =
+                await _httpClient.GetAsync(url, cancellationToken);
+
+            var content = await response.Content
+                .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                throw PdfGateException.FromHttpError(response.StatusCode,
+                    url, content);
+
+            return content;
+        }
+        catch (PdfGateException)
+        {
+            throw;
+        }
+        catch (TaskCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new PdfGateException(
+                $"Failed to call endpoint '{url}'.", ex);
+        }
+    }
+
     private async Task<string> TryPost(
         Func<Task<HttpResponseMessage>> sendPostRequest,
         string url,

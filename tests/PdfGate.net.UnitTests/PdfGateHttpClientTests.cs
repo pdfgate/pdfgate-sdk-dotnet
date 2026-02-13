@@ -115,6 +115,46 @@ public sealed class PdfGateHttpClientTests
         Assert.Equal(expectedBytes, actualContent.ToArray());
     }
 
+    [Fact]
+    public async Task
+        GetAsync_WhenResponseIsNonSuccess_ThrowsPdfGateExceptionWithStatusBodyAndEndpoint()
+    {
+        const string endpoint = "document/somedocumentid";
+        const string responseBody = "{\"error\":\"not found\"}";
+
+        using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
+            new HttpResponseMessage(HttpStatusCode.NotFound)
+            {
+                Content = new StringContent(responseBody)
+            }));
+
+        var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
+            client.GetAsync(endpoint,
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
+        Assert.Equal(responseBody, exception.ResponseBody);
+        Assert.Contains(endpoint, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task GetAsync_WhenResponseIsSuccess_ReturnsStringContent()
+    {
+        const string endpoint = "document/somedocumentid";
+        const string responseBody = "{\"id\":\"doc_123\"}";
+
+        using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
+            new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(responseBody)
+            }));
+
+        string content = await client.GetAsync(endpoint,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(responseBody, content);
+    }
+
     private static PdfGateHttpClient CreateClient(
         Func<HttpRequestMessage, Task<HttpResponseMessage>> sendAsync)
     {
