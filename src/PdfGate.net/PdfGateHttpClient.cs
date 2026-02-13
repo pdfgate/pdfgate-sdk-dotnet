@@ -76,7 +76,7 @@ internal sealed class PdfGateHttpClient : IDisposable
 
         return await TrySendRequest(async () => await _httpClient
             .PostAsync(url, content, cancellationToken)
-            .ConfigureAwait(false), url, cancellationToken);
+            .ConfigureAwait(false), url, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<string> PostAsMultipartAsync(string url,
@@ -88,7 +88,7 @@ internal sealed class PdfGateHttpClient : IDisposable
         return await TrySendRequest(
             async () => await _httpClient
                 .PostAsync(url, content, cancellationToken)
-                .ConfigureAwait(false), url, cancellationToken);
+                .ConfigureAwait(false), url, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<Stream> GetStreamAsync(string url,
@@ -99,7 +99,7 @@ internal sealed class PdfGateHttpClient : IDisposable
         try
         {
             using HttpResponseMessage response =
-                await _httpClient.GetAsync(url, cancellationToken);
+                await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -138,7 +138,7 @@ internal sealed class PdfGateHttpClient : IDisposable
         return await TrySendRequest(
             async () => await _httpClient
                 .GetAsync(url, cancellationToken)
-                .ConfigureAwait(false), url, cancellationToken);
+                .ConfigureAwait(false), url, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<string> TrySendRequest(
@@ -148,7 +148,7 @@ internal sealed class PdfGateHttpClient : IDisposable
     {
         try
         {
-            using HttpResponseMessage response = await sendRequest();
+            using HttpResponseMessage response = await sendRequest().ConfigureAwait(false);
 
             var content = await response.Content
                 .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);

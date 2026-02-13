@@ -90,7 +90,7 @@ public sealed class PdfGate : IDisposable
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url,
             jsonRequest,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -111,7 +111,7 @@ public sealed class PdfGate : IDisposable
         var url = ApiRoutes.FlattenPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -134,7 +134,7 @@ public sealed class PdfGate : IDisposable
         MultipartFormDataContent form =
             builder.Build();
         var content = await _httpClient.PostAsMultipartAsync(url, form,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -154,7 +154,7 @@ public sealed class PdfGate : IDisposable
         var url = ApiRoutes.ProtectPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -174,7 +174,7 @@ public sealed class PdfGate : IDisposable
         var url = ApiRoutes.CompressPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -194,7 +194,7 @@ public sealed class PdfGate : IDisposable
         var url = ApiRoutes.ExtractPdfFormData;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return _responseParser.ParseObject(content, url);
     }
@@ -214,7 +214,7 @@ public sealed class PdfGate : IDisposable
         var url = ApiRoutes.GetDocument(request.DocumentId,
             request.PreSignedUrlExpiresIn);
 
-        var content = await _httpClient.GetAsync(url, cancellationToken);
+        var content = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -233,7 +233,7 @@ public sealed class PdfGate : IDisposable
 
         var url = ApiRoutes.GetFile(request.DocumentId);
         Stream content =
-            await _httpClient.GetStreamAsync(url, cancellationToken);
+            await _httpClient.GetStreamAsync(url, cancellationToken).ConfigureAwait(false);
 
         return content;
     }
@@ -259,7 +259,7 @@ public sealed class PdfGate : IDisposable
 
         var response =
             await _httpClient.PostAsMultipartAsync(url, form,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
         return _responseParser.Parse(response, url);
     }
