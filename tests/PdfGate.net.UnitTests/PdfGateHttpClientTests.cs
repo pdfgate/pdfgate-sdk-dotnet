@@ -14,7 +14,7 @@ public sealed class PdfGateHttpClientTests
     public async Task
         PostAsJsonAsync_WhenResponseIsNonSuccess_ThrowsPdfGateExceptionWithStatusBodyAndEndpoint()
     {
-        const string endpoint = "v1/generate/pdf";
+        const string endpoint = ApiRoutes.GeneratePdf;
         const string responseBody = "{\"error\":\"invalid input\"}";
 
         using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
@@ -45,7 +45,7 @@ public sealed class PdfGateHttpClientTests
 
         var request = new GeneratePdfRequest { Html = "<p>hello</p>" };
         var exception = await Assert.ThrowsAsync<PdfGateException>(() =>
-            client.PostAsJsonAsync("v1/generate/pdf",
+            client.PostAsJsonAsync(ApiRoutes.GeneratePdf,
                 JsonSerializer.Serialize(request),
                 TestContext.Current.CancellationToken));
 
@@ -66,7 +66,7 @@ public sealed class PdfGateHttpClientTests
 
         var request = new GeneratePdfRequest { Html = "<p>hello</p>" };
         await Assert.ThrowsAsync<TaskCanceledException>(() =>
-            client.PostAsJsonAsync("v1/generate/pdf",
+            client.PostAsJsonAsync(ApiRoutes.GeneratePdf,
                 JsonSerializer.Serialize(request),
                 cts.Token));
     }
@@ -75,7 +75,7 @@ public sealed class PdfGateHttpClientTests
     public async Task
         GetStreamAsync_WhenResponseIsNonSuccess_ThrowsPdfGateExceptionWithStatusBodyAndEndpoint()
     {
-        const string endpoint = "file/somedocumentid";
+        var endpoint = ApiRoutes.GetFile("somedocumentid");
         const string responseBody = "{\"error\":\"not found\"}";
 
         using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
@@ -97,7 +97,7 @@ public sealed class PdfGateHttpClientTests
     public async Task
         GetStreamAsync_WhenResponseIsSuccess_ReturnsStreamWithAllContent()
     {
-        const string endpoint = "file/somedocumentid";
+        var endpoint = ApiRoutes.GetFile("somedocumentid");
         var expectedBytes = Encoding.UTF8.GetBytes("pdf content");
 
         using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
@@ -119,7 +119,7 @@ public sealed class PdfGateHttpClientTests
     public async Task
         GetAsync_WhenResponseIsNonSuccess_ThrowsPdfGateExceptionWithStatusBodyAndEndpoint()
     {
-        const string endpoint = "document/somedocumentid";
+        var endpoint = ApiRoutes.GetDocument("somedocumentid");
         const string responseBody = "{\"error\":\"not found\"}";
 
         using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(
@@ -140,7 +140,7 @@ public sealed class PdfGateHttpClientTests
     [Fact]
     public async Task GetAsync_WhenResponseIsSuccess_ReturnsStringContent()
     {
-        const string endpoint = "document/somedocumentid";
+        var endpoint = ApiRoutes.GetDocument("somedocumentid");
         const string responseBody = "{\"id\":\"doc_123\"}";
 
         using PdfGateHttpClient client = CreateClient(_ => Task.FromResult(

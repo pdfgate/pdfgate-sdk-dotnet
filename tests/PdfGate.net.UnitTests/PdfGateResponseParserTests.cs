@@ -27,7 +27,7 @@ public sealed class PdfGateResponseParserTests
     {
         var parser = new PdfGateResponseParser(new JsonSerializerOptions());
         Assert.Throws<PdfGateException>(() =>
-            parser.ParseObject(responseBody, "forms/extract-data"));
+            parser.ParseObject(responseBody, ApiRoutes.ExtractPdfFormData));
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public sealed class PdfGateResponseParserTests
         var parser = new PdfGateResponseParser(new JsonSerializerOptions());
 
         JsonElement response =
-            parser.ParseObject(responseBody, "forms/extract-data");
+            parser.ParseObject(responseBody, ApiRoutes.ExtractPdfFormData);
 
         Assert.Equal(JsonValueKind.Object, response.ValueKind);
         Assert.Equal("John", response.GetProperty("first_name").GetString());

@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -89,7 +88,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = "v1/generate/pdf";
+        var url = ApiRoutes.GeneratePdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url,
             jsonRequest,
@@ -111,7 +110,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = "forms/flatten";
+        var url = ApiRoutes.FlattenPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
             cancellationToken);
@@ -131,7 +130,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = "watermark/pdf";
+        var url = ApiRoutes.WatermarkPdf;
         var builder = new WatermarkPdfMultipartRequestBuilder(request,
             JsonOptions);
         MultipartFormDataContent form =
@@ -154,7 +153,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = "protect/pdf";
+        var url = ApiRoutes.ProtectPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
             cancellationToken);
@@ -174,7 +173,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = "compress/pdf";
+        var url = ApiRoutes.CompressPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
             cancellationToken);
@@ -194,7 +193,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = "forms/extract-data";
+        var url = ApiRoutes.ExtractPdfFormData;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
             cancellationToken);
@@ -214,10 +213,8 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = $"document/{Uri.EscapeDataString(request.DocumentId)}";
-        if (request.PreSignedUrlExpiresIn.HasValue)
-            url +=
-                $"?preSignedUrlExpiresIn={request.PreSignedUrlExpiresIn.Value.ToString(CultureInfo.InvariantCulture)}";
+        var url = ApiRoutes.GetDocument(request.DocumentId,
+            request.PreSignedUrlExpiresIn);
 
         var content = await _httpClient.GetAsync(url, cancellationToken);
 
@@ -236,7 +233,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = $"file/{request.DocumentId}";
+        var url = ApiRoutes.GetFile(request.DocumentId);
         Stream content =
             await _httpClient.GetStreamAsync(url, cancellationToken);
 
@@ -257,7 +254,7 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var url = "upload";
+        var url = ApiRoutes.UploadFile;
         var form = new MultipartFormDataContent();
         if (request.Url is not null)
         {
