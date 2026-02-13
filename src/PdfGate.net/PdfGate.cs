@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -116,6 +117,114 @@ public sealed class PdfGate : IDisposable
             cancellationToken);
 
         return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Applies a watermark to a PDF and returns document metadata.
+    /// </summary>
+    /// <param name="request">Watermark PDF request payload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Watermarked document metadata response.</returns>
+    public async Task<PdfGateDocumentResponse> WatermarkPdfAsync(
+        WatermarkPdfRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var url = "watermark/pdf";
+        MultipartFormDataContent form =
+            BuildWatermarkPdfMultipartRequest(request);
+        var content = await _httpClient.PostAsMultipartAsync(url, form,
+            cancellationToken);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    private MultipartFormDataContent BuildWatermarkPdfMultipartRequest(
+        WatermarkPdfRequest request)
+    {
+        var form = new MultipartFormDataContent
+        {
+            {
+                new StringContent(request.DocumentId, Encoding.UTF8),
+                "documentId"
+            },
+            {
+                new StringContent(request.Type.ToString().ToLowerInvariant(),
+                    Encoding.UTF8),
+                "type"
+            },
+            { new StringContent("true", Encoding.UTF8), "jsonResponse" }
+        };
+
+        if (request.Watermark is not null)
+        {
+            var watermarkContent = new StreamContent(request.Watermark.Content);
+            watermarkContent.Headers.ContentType =
+                new MediaTypeHeaderValue(request.Watermark.Type);
+            form.Add(watermarkContent, "watermark", request.Watermark.Name);
+        }
+
+        if (request.FontFile is not null)
+        {
+            var fontFileContent = new StreamContent(request.FontFile.Content);
+            fontFileContent.Headers.ContentType =
+                new MediaTypeHeaderValue(request.FontFile.Type);
+            form.Add(fontFileContent, "fontFile", request.FontFile.Name);
+        }
+
+        if (request.Text is not null)
+            form.Add(new StringContent(request.Text, Encoding.UTF8), "text");
+        if (request.Font is not null)
+            form.Add(
+                new StringContent(request.Font.Value.ToApiValue(),
+                    Encoding.UTF8), "font");
+        if (request.FontSize.HasValue)
+            form.Add(
+                new StringContent(request.FontSize.Value.ToString(),
+                    Encoding.UTF8), "fontSize");
+        if (request.FontColor is not null)
+            form.Add(
+                new StringContent(request.FontColor, Encoding.UTF8),
+                "fontColor");
+        if (request.Opacity.HasValue)
+            form.Add(
+                new StringContent(request.Opacity.Value.ToString(
+                    CultureInfo.InvariantCulture), Encoding.UTF8),
+                "opacity");
+        if (request.XPosition.HasValue)
+            form.Add(
+                new StringContent(request.XPosition.Value.ToString(),
+                    Encoding.UTF8), "xPosition");
+        if (request.YPosition.HasValue)
+            form.Add(
+                new StringContent(request.YPosition.Value.ToString(),
+                    Encoding.UTF8), "yPosition");
+        if (request.ImageWidth.HasValue)
+            form.Add(
+                new StringContent(request.ImageWidth.Value.ToString(),
+                    Encoding.UTF8), "imageWidth");
+        if (request.ImageHeight.HasValue)
+            form.Add(
+                new StringContent(request.ImageHeight.Value.ToString(),
+                    Encoding.UTF8), "imageHeight");
+        if (request.Rotate.HasValue)
+            form.Add(
+                new StringContent(request.Rotate.Value.ToString(
+                    CultureInfo.InvariantCulture), Encoding.UTF8),
+                "rotate");
+        if (request.PreSignedUrlExpiresIn.HasValue)
+            form.Add(
+                new StringContent(
+                    request.PreSignedUrlExpiresIn.Value.ToString(),
+                    Encoding.UTF8), "preSignedUrlExpiresIn");
+        if (request.Metadata is not null)
+            form.Add(
+                new StringContent(
+                    JsonSerializer.Serialize(request.Metadata, JsonOptions),
+                    Encoding.UTF8), "metadata");
+
+        return form;
     }
 
     /// <summary>
