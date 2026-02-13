@@ -61,7 +61,11 @@ csharp_style_expression_bodied_properties = true:silent
 csharp_style_expression_bodied_indexers = true:silent
 csharp_style_expression_bodied_accessors = true:silent
 
+[src/**/*.cs]
 dotnet_diagnostic.CA2007.severity = error
+
+[tests/**/*.cs]
+dotnet_diagnostic.CA2007.severity = none
 
 [*.{csproj,props,targets}]
 indent_size = 2
