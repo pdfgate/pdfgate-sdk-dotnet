@@ -1,5 +1,3 @@
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -255,32 +253,9 @@ public sealed class PdfGate : IDisposable
         ArgumentNullException.ThrowIfNull(request);
 
         var url = ApiRoutes.UploadFile;
-        var form = new MultipartFormDataContent();
-        if (request.Url is not null)
-        {
-            form.Add(new StringContent(request.Url.AbsoluteUri, Encoding.UTF8),
-                "url");
-        }
-        else
-        {
-            var fileContent = new StreamContent(request.Content);
-            fileContent.Headers.ContentType =
-                new MediaTypeHeaderValue("application/pdf");
-            form.Add(fileContent, "file", "input.pdf");
-        }
-
-        if (request.Metadata is not null)
-            form.Add(new StringContent(
-                JsonSerializer.Serialize(request.Metadata, JsonOptions),
-                Encoding.UTF8), "metadata");
-
-        if (request.PreSignedUrlExpiresIn.HasValue)
-            form.Add(
-                new StringContent(
-                    request.PreSignedUrlExpiresIn.Value.ToString(),
-                    Encoding.UTF8),
-                "preSignedUrlExpiresIn");
-
+        var builder = new UploadFileMultipartRequestBuilder(request,
+            JsonOptions);
+        MultipartFormDataContent form = builder.Build();
 
         var response =
             await _httpClient.PostAsMultipartAsync(url, form,
