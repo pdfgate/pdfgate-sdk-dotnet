@@ -46,7 +46,7 @@ public class
     /// <summary>
     ///     Uploads a file by URL
     /// </summary>
-    [Fact]
+    [Fact(Skip = "The HTTP API is failing currently for this case")]
     public async Task UploadFileAsync_UploadsFileByUrl()
     {
         PdfGate client = _clientFixture.GetClientOrSkip();
