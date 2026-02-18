@@ -68,15 +68,16 @@ public class
     /// <summary>
     ///     Uploads a file by URL
     /// </summary>
-    [Fact(Skip = "The HTTP API is failing currently for this case")]
+    [Fact]
     public async Task UploadFileAsync_UploadsFileByUrl()
     {
         PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse document =
+            await _documentFixture.GetDocumentOrSkipAsync(client);
         var request = new UploadFileRequest
         {
             Url =
-                new Uri(
-                    "https://www.rd.usda.gov/sites/default/files/pdf-sample_0.pdf")
+                new Uri(document.FileUrl!)
         };
         PdfGateDocumentResponse uploadedResponse =
             await client.UploadFileAsync(request,
@@ -89,15 +90,16 @@ public class
     /// <summary>
     ///     Uploads a file by URL
     /// </summary>
-    [Fact(Skip = "The HTTP API is failing currently for this case")]
+    [Fact]
     public void UploadFile_UploadsFileByUrl()
     {
         PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateDocumentResponse document =
+            _documentFixture.GetDocumentOrSkip(client);
         var request = new UploadFileRequest
         {
             Url =
-                new Uri(
-                    "https://www.rd.usda.gov/sites/default/files/pdf-sample_0.pdf")
+                new Uri(document.FileUrl!)
         };
         PdfGateDocumentResponse uploadedResponse =
             client.UploadFile(request,
