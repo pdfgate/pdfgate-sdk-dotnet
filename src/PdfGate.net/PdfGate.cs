@@ -42,8 +42,8 @@ public sealed class PdfGate : IDisposable
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("An API key is required.");
 
-        ArgumentNullException.ThrowIfNull(httpMessageHandler);
-        ArgumentNullException.ThrowIfNull(requestTimeouts);
+        Guard.ThrowIfNull(httpMessageHandler);
+        Guard.ThrowIfNull(requestTimeouts);
         requestTimeouts.Validate();
 
         Uri baseAddress = GetBaseUriFromApiKey(apiKey);
@@ -72,7 +72,7 @@ public sealed class PdfGate : IDisposable
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("An API key is required.");
 
-        ArgumentNullException.ThrowIfNull(requestTimeouts);
+        Guard.ThrowIfNull(requestTimeouts);
         requestTimeouts.Validate();
 
         Uri baseAddress = GetBaseUriFromApiKey(apiKey);
@@ -131,7 +131,7 @@ public sealed class PdfGate : IDisposable
         GeneratePdfRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.GeneratePdf,
@@ -155,7 +155,7 @@ public sealed class PdfGate : IDisposable
         GeneratePdfRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.GeneratePdf,
@@ -191,7 +191,7 @@ public sealed class PdfGate : IDisposable
         FlattenPdfRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.FlattenPdf,
@@ -214,7 +214,7 @@ public sealed class PdfGate : IDisposable
         FlattenPdfRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.FlattenPdf,
@@ -248,7 +248,7 @@ public sealed class PdfGate : IDisposable
         WatermarkPdfRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.WatermarkPdf,
@@ -274,7 +274,7 @@ public sealed class PdfGate : IDisposable
         WatermarkPdfRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.WatermarkPdf,
@@ -311,7 +311,7 @@ public sealed class PdfGate : IDisposable
         ProtectPdfRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.ProtectPdf,
@@ -334,7 +334,7 @@ public sealed class PdfGate : IDisposable
         ProtectPdfRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.ProtectPdf,
@@ -368,7 +368,7 @@ public sealed class PdfGate : IDisposable
         CompressPdfRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.CompressPdf,
@@ -391,7 +391,7 @@ public sealed class PdfGate : IDisposable
         CompressPdfRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts = CreateTimeoutTokenSource(
             _requestTimeouts.CompressPdf,
@@ -425,7 +425,7 @@ public sealed class PdfGate : IDisposable
         ExtractPdfFormDataRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
@@ -448,7 +448,7 @@ public sealed class PdfGate : IDisposable
         ExtractPdfFormDataRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
@@ -482,7 +482,7 @@ public sealed class PdfGate : IDisposable
         GetDocumentRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
@@ -505,7 +505,7 @@ public sealed class PdfGate : IDisposable
         GetDocumentRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
@@ -540,7 +540,7 @@ public sealed class PdfGate : IDisposable
         GetFileRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
@@ -562,7 +562,7 @@ public sealed class PdfGate : IDisposable
         GetFileRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
@@ -600,7 +600,7 @@ public sealed class PdfGate : IDisposable
         UploadFileRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
@@ -629,7 +629,7 @@ public sealed class PdfGate : IDisposable
         UploadFileRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         using CancellationTokenSource cts =
             CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,

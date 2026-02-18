@@ -29,7 +29,7 @@ internal sealed class PdfGateHttpClient : IDisposable
     private PdfGateHttpClient(string apiKey, Uri baseAddress,
         HttpClient httpClient, JsonSerializerOptions jsonOptions)
     {
-        ArgumentNullException.ThrowIfNull(httpClient);
+        Guard.ThrowIfNull(httpClient);
 
         _httpClient = httpClient;
         _httpClient.BaseAddress = baseAddress;
@@ -57,7 +57,7 @@ internal sealed class PdfGateHttpClient : IDisposable
         string request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         return await TrySendRequest(async () =>
             {
@@ -75,7 +75,7 @@ internal sealed class PdfGateHttpClient : IDisposable
         string request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        Guard.ThrowIfNull(request);
 
         return TrySendRequest(() =>
         {
@@ -85,7 +85,9 @@ internal sealed class PdfGateHttpClient : IDisposable
             using var requestMessage =
                 new HttpRequestMessage(HttpMethod.Post, url);
             requestMessage.Content = content;
-            return _httpClient.Send(requestMessage, cancellationToken);
+            return _httpClient.SendAsync(requestMessage, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
         }, url, cancellationToken);
     }
 
@@ -93,7 +95,7 @@ internal sealed class PdfGateHttpClient : IDisposable
         MultipartFormDataContent content,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(content);
+        Guard.ThrowIfNull(content);
 
         return await TrySendRequest(
                 async () => await _httpClient
@@ -106,21 +108,23 @@ internal sealed class PdfGateHttpClient : IDisposable
         MultipartFormDataContent content,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(content);
+        Guard.ThrowIfNull(content);
 
         return TrySendRequest(() =>
         {
             using var requestMessage =
                 new HttpRequestMessage(HttpMethod.Post, url);
             requestMessage.Content = content;
-            return _httpClient.Send(requestMessage, cancellationToken);
+            return _httpClient.SendAsync(requestMessage, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
         }, url, cancellationToken);
     }
 
     public async Task<Stream> GetStreamAsync(string url,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(url);
+        Guard.ThrowIfNull(url);
 
         try
         {
@@ -131,13 +135,13 @@ internal sealed class PdfGateHttpClient : IDisposable
             if (!response.IsSuccessStatusCode)
             {
                 var errorResponse = await response.Content
-                    .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                    .ReadAsStringAsync().ConfigureAwait(false);
                 throw PdfGateException.FromHttpError(response.StatusCode,
                     url, errorResponse);
             }
 
             var byteArrayContent = await response.Content
-                .ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+                .ReadAsByteArrayAsync().ConfigureAwait(false);
             Stream content = new MemoryStream(byteArrayContent, false);
 
             return content;
@@ -160,7 +164,7 @@ internal sealed class PdfGateHttpClient : IDisposable
     public async Task<string> GetAsync(string url,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(url);
+        Guard.ThrowIfNull(url);
 
         return await TrySendRequest(
                 async () => await _httpClient
@@ -172,14 +176,16 @@ internal sealed class PdfGateHttpClient : IDisposable
     public string Get(string url,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(url);
+        Guard.ThrowIfNull(url);
 
         return TrySendRequest(
             () =>
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get,
                     url);
-                return _httpClient.Send(request, cancellationToken);
+                return _httpClient.SendAsync(request, cancellationToken)
+                    .GetAwaiter()
+                    .GetResult();
             },
             url, cancellationToken);
     }
@@ -187,13 +193,15 @@ internal sealed class PdfGateHttpClient : IDisposable
     public Stream GetStream(string url,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(url);
+        Guard.ThrowIfNull(url);
 
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             using HttpResponseMessage response =
-                _httpClient.Send(request, cancellationToken);
+                _httpClient.SendAsync(request, cancellationToken)
+                    .GetAwaiter()
+                    .GetResult();
 
             if (!response.IsSuccessStatusCode)
             {
@@ -235,7 +243,7 @@ internal sealed class PdfGateHttpClient : IDisposable
                 await sendRequest().ConfigureAwait(false);
 
             var content = await response.Content
-                .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                .ReadAsStringAsync().ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
                 throw PdfGateException.FromHttpError(response.StatusCode,
@@ -293,7 +301,9 @@ internal sealed class PdfGateHttpClient : IDisposable
     private static string ReadContentAsString(HttpContent content,
         CancellationToken cancellationToken = default)
     {
-        using Stream stream = content.ReadAsStream(cancellationToken);
+        using Stream stream = content.ReadAsStreamAsync()
+            .GetAwaiter()
+            .GetResult();
         using var reader = new StreamReader(stream, Encoding.UTF8, true, -1,
             false);
 
@@ -303,7 +313,9 @@ internal sealed class PdfGateHttpClient : IDisposable
     private static byte[] ReadContentAsByteArray(HttpContent content,
         CancellationToken cancellationToken = default)
     {
-        using Stream stream = content.ReadAsStream(cancellationToken);
+        using Stream stream = content.ReadAsStreamAsync()
+            .GetAwaiter()
+            .GetResult();
         using var memory = new MemoryStream();
         stream.CopyTo(memory);
 

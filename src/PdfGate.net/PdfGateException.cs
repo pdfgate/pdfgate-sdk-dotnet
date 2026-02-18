@@ -54,7 +54,7 @@ public sealed class PdfGateException : Exception
     public static PdfGateException FromHttpError(HttpStatusCode statusCode, string endpoint, string body)
     {
         var truncatedBody = body.Length > MaxBodyLength
-            ? body[..MaxBodyLength]
+            ? body.Substring(0, MaxBodyLength)
             : body;
 
         var message = $"PDFGate request to '{endpoint}' failed with status code {(int)statusCode} ({statusCode}). Response body: {truncatedBody}";
