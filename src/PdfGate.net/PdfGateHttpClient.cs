@@ -35,6 +35,13 @@ internal sealed class PdfGateHttpClient : IDisposable
         _httpClient.BaseAddress = baseAddress;
         _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", apiKey);
+        /*
+         * HttpClient's default timeout is 100 seconds. Since we need longer
+         * timeouts for some requests, e.g. 15 minutes for GeneratePdf, the
+         * global timeout of the client needs to be longer than the longest
+         * per-request timeout because the client uses the shortest of both.
+         */
+        _httpClient.Timeout = new TimeSpan(0, 30, 0);
         _jsonOptions = jsonOptions;
     }
 

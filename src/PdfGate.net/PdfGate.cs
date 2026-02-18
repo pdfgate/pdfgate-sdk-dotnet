@@ -28,19 +28,29 @@ public sealed class PdfGate : IDisposable
     };
 
     private readonly PdfGateHttpClient _httpClient;
+    private readonly PdfGateRequestTimeouts _requestTimeouts;
     private readonly PdfGateResponseParser _responseParser;
 
     internal PdfGate(string apiKey, HttpMessageHandler httpMessageHandler)
+        : this(apiKey, httpMessageHandler, new PdfGateRequestTimeouts())
+    {
+    }
+
+    internal PdfGate(string apiKey, HttpMessageHandler httpMessageHandler,
+        PdfGateRequestTimeouts requestTimeouts)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("An API key is required.");
 
         ArgumentNullException.ThrowIfNull(httpMessageHandler);
+        ArgumentNullException.ThrowIfNull(requestTimeouts);
+        requestTimeouts.Validate();
 
         Uri baseAddress = GetBaseUriFromApiKey(apiKey);
         _httpClient = new PdfGateHttpClient(apiKey, baseAddress,
             httpMessageHandler, JsonOptions);
         _responseParser = new PdfGateResponseParser(JsonOptions);
+        _requestTimeouts = requestTimeouts;
     }
 
     /// <summary>
@@ -48,13 +58,27 @@ public sealed class PdfGate : IDisposable
     /// </summary>
     /// <param name="apiKey">The API key for the PDFGate HTTP API; either sandbox or production.</param>
     public PdfGate(string apiKey)
+        : this(apiKey, new PdfGateRequestTimeouts())
+    {
+    }
+
+    /// <summary>
+    ///     Creates a new <see cref="PdfGate" /> instance.
+    /// </summary>
+    /// <param name="apiKey">The API key for the PDFGate HTTP API; either sandbox or production.</param>
+    /// <param name="requestTimeouts">Per-endpoint request timeout configuration.</param>
+    internal PdfGate(string apiKey, PdfGateRequestTimeouts requestTimeouts)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("An API key is required.");
 
+        ArgumentNullException.ThrowIfNull(requestTimeouts);
+        requestTimeouts.Validate();
+
         Uri baseAddress = GetBaseUriFromApiKey(apiKey);
         _httpClient = new PdfGateHttpClient(apiKey, baseAddress, JsonOptions);
         _responseParser = new PdfGateResponseParser(JsonOptions);
+        _requestTimeouts = requestTimeouts;
     }
 
     /// <inheritdoc />
@@ -74,6 +98,16 @@ public sealed class PdfGate : IDisposable
         throw new ArgumentException(
             "Invalid API key format. Expected to start with 'live_' or 'test_'.",
             nameof(apiKey));
+    }
+
+    private static CancellationTokenSource CreateTimeoutTokenSource(
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        var cts =
+            CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(timeout);
+        return cts;
     }
 
     /// <summary>
@@ -99,11 +133,14 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.GeneratePdf,
+            cancellationToken);
         var url = ApiRoutes.GeneratePdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = _httpClient.PostAsJson(url,
             jsonRequest,
-            cancellationToken);
+            cts.Token);
 
         return _responseParser.Parse(content, url);
     }
@@ -120,11 +157,14 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.GeneratePdf,
+            cancellationToken);
         var url = ApiRoutes.GeneratePdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url,
             jsonRequest,
-            cancellationToken).ConfigureAwait(false);
+            cts.Token).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -153,10 +193,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.FlattenPdf,
+            cancellationToken);
         var url = ApiRoutes.FlattenPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = _httpClient.PostAsJson(url, jsonRequest,
-            cancellationToken);
+            cts.Token);
 
         return _responseParser.Parse(content, url);
     }
@@ -173,10 +216,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.FlattenPdf,
+            cancellationToken);
         var url = ApiRoutes.FlattenPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken).ConfigureAwait(false);
+            cts.Token).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -204,13 +250,16 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.WatermarkPdf,
+            cancellationToken);
         var url = ApiRoutes.WatermarkPdf;
         var builder = new WatermarkPdfMultipartRequestBuilder(request,
             JsonOptions);
         MultipartFormDataContent form =
             builder.Build();
         var content = _httpClient.PostAsMultipart(url, form,
-            cancellationToken);
+            cts.Token);
 
         return _responseParser.Parse(content, url);
     }
@@ -227,13 +276,16 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.WatermarkPdf,
+            cancellationToken);
         var url = ApiRoutes.WatermarkPdf;
         var builder = new WatermarkPdfMultipartRequestBuilder(request,
             JsonOptions);
         MultipartFormDataContent form =
             builder.Build();
         var content = await _httpClient.PostAsMultipartAsync(url, form,
-            cancellationToken).ConfigureAwait(false);
+            cts.Token).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -261,10 +313,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.ProtectPdf,
+            cancellationToken);
         var url = ApiRoutes.ProtectPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = _httpClient.PostAsJson(url, jsonRequest,
-            cancellationToken);
+            cts.Token);
 
         return _responseParser.Parse(content, url);
     }
@@ -281,10 +336,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.ProtectPdf,
+            cancellationToken);
         var url = ApiRoutes.ProtectPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken).ConfigureAwait(false);
+            cts.Token).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -312,10 +370,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.CompressPdf,
+            cancellationToken);
         var url = ApiRoutes.CompressPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = _httpClient.PostAsJson(url, jsonRequest,
-            cancellationToken);
+            cts.Token);
 
         return _responseParser.Parse(content, url);
     }
@@ -332,10 +393,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.CompressPdf,
+            cancellationToken);
         var url = ApiRoutes.CompressPdf;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken).ConfigureAwait(false);
+            cts.Token).ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
     }
@@ -363,10 +427,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.ExtractPdfFormData;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = _httpClient.PostAsJson(url, jsonRequest,
-            cancellationToken);
+            cts.Token);
 
         return _responseParser.ParseObject(content, url);
     }
@@ -383,10 +450,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.ExtractPdfFormData;
         var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
         var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
-            cancellationToken).ConfigureAwait(false);
+            cts.Token).ConfigureAwait(false);
 
         return _responseParser.ParseObject(content, url);
     }
@@ -414,10 +484,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.GetDocument(request.DocumentId,
             request.PreSignedUrlExpiresIn);
 
-        var content = _httpClient.Get(url, cancellationToken);
+        var content = _httpClient.Get(url, cts.Token);
 
         return _responseParser.Parse(content, url);
     }
@@ -434,10 +507,13 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.GetDocument(request.DocumentId,
             request.PreSignedUrlExpiresIn);
 
-        var content = await _httpClient.GetAsync(url, cancellationToken)
+        var content = await _httpClient.GetAsync(url, cts.Token)
             .ConfigureAwait(false);
 
         return _responseParser.Parse(content, url);
@@ -466,9 +542,12 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.GetFile(request.DocumentId);
         Stream content =
-            _httpClient.GetStream(url, cancellationToken);
+            _httpClient.GetStream(url, cts.Token);
 
         return content;
     }
@@ -485,9 +564,12 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.GetFile(request.DocumentId);
         Stream content =
-            await _httpClient.GetStreamAsync(url, cancellationToken)
+            await _httpClient.GetStreamAsync(url, cts.Token)
                 .ConfigureAwait(false);
 
         return content;
@@ -520,6 +602,9 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.UploadFile;
         var builder = new UploadFileMultipartRequestBuilder(request,
             JsonOptions);
@@ -527,7 +612,7 @@ public sealed class PdfGate : IDisposable
 
         var response =
             _httpClient.PostAsMultipart(url, form,
-                cancellationToken);
+                cts.Token);
 
         return _responseParser.Parse(response, url);
     }
@@ -546,6 +631,9 @@ public sealed class PdfGate : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
         var url = ApiRoutes.UploadFile;
         var builder = new UploadFileMultipartRequestBuilder(request,
             JsonOptions);
@@ -553,7 +641,7 @@ public sealed class PdfGate : IDisposable
 
         var response =
             await _httpClient.PostAsMultipartAsync(url, form,
-                cancellationToken).ConfigureAwait(false);
+                cts.Token).ConfigureAwait(false);
 
         return _responseParser.Parse(response, url);
     }
