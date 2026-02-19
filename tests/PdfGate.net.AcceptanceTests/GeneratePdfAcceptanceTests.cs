@@ -78,10 +78,7 @@ public sealed class
             PageSizeType = GeneratePdfPageSizeType.A4,
             Margin = new GeneratePdfPageMargin
             {
-                Top = "20px",
-                Bottom = "20px",
-                Left = "12px",
-                Right = "12px"
+                Top = "20px", Bottom = "20px", Left = "12px", Right = "12px"
             }
         };
 
@@ -107,10 +104,7 @@ public sealed class
             PageSizeType = GeneratePdfPageSizeType.A4,
             Margin = new GeneratePdfPageMargin
             {
-                Top = "20px",
-                Bottom = "20px",
-                Left = "12px",
-                Right = "12px"
+                Top = "20px", Bottom = "20px", Left = "12px", Right = "12px"
             }
         };
 
@@ -146,7 +140,8 @@ public sealed class
     ///     Returns a PdfGateException with the HTTP API message when the API returns an error status.
     /// </summary>
     [Fact]
-    public void GeneratePdf_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
+    public void
+        GeneratePdf_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
         PdfGate client = _fixture.GetClientOrSkip();
 
