@@ -7,6 +7,7 @@ namespace PdfGate.net;
 
 /// <summary>
 ///     Client used to interact with the PDFGate HTTP API.
+///     Full documentation of the API: https://pdfgate.com/documentation
 /// </summary>
 public sealed class PdfGate : IDisposable
 {
@@ -56,7 +57,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Creates a new <see cref="PdfGate" /> instance.
     /// </summary>
-    /// <param name="apiKey">The API key for the PDFGate HTTP API; either sandbox or production.</param>
+    /// <param name="apiKey">The API key for the PDFGate HTTP API; "test_" for sandbox or "live_" for production.</param>
     public PdfGate(string apiKey)
         : this(apiKey, new PdfGateRequestTimeouts())
     {
@@ -111,9 +112,9 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Generates a PDF document from HTML or URL input.
+    ///     Generates a PDF document from an inline HTML or a URL.
     /// </summary>
-    /// <param name="request">Generate PDF request payload.</param>
+    /// <param name="request">Generate PDF request payload. See <see cref="GeneratePdfRequest" />.</param>
     /// <returns>Generated document metadata response.</returns>
     public PdfGateDocumentResponse GeneratePdf(
         GeneratePdfRequest request)
@@ -122,9 +123,9 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Generates a PDF document from HTML or URL input.
+    ///     Generates a PDF document from an inline HTML or a URL.
     /// </summary>
-    /// <param name="request">Generate PDF request payload.</param>
+    /// <param name="request">Generate PDF request payload. See <see cref="GeneratePdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Generated document metadata response.</returns>
     public PdfGateDocumentResponse GeneratePdf(
@@ -146,9 +147,9 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Generates a PDF document from HTML or URL input.
+    ///     Generates a PDF document from an inline HTML or a URL.
     /// </summary>
-    /// <param name="request">Generate PDF request payload.</param>
+    /// <param name="request">Generate PDF request payload. See <see cref="GeneratePdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Generated document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> GeneratePdfAsync(
@@ -173,7 +174,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Flattens a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Flatten PDF request payload.</param>
+    /// <param name="request">Flatten PDF request payload. See <see cref="FlattenPdfRequest" />.</param>
     /// <returns>Flattened document metadata response.</returns>
     public PdfGateDocumentResponse FlattenPdf(
         FlattenPdfRequest request)
@@ -184,7 +185,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Flattens a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Flatten PDF request payload.</param>
+    /// <param name="request">Flatten PDF request payload. See <see cref="FlattenPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Flattened document metadata response.</returns>
     public PdfGateDocumentResponse FlattenPdf(
@@ -207,7 +208,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Flattens a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Flatten PDF request payload.</param>
+    /// <param name="request">Flatten PDF request payload. See <see cref="FlattenPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Flattened document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> FlattenPdfAsync(
@@ -230,7 +231,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Applies a watermark to a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Watermark PDF request payload.</param>
+    /// <param name="request">Watermark PDF request payload. See <see cref="WatermarkPdfRequest" />.</param>
     /// <returns>Watermarked document metadata response.</returns>
     public PdfGateDocumentResponse WatermarkPdf(
         WatermarkPdfRequest request)
@@ -241,7 +242,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Applies a watermark to a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Watermark PDF request payload.</param>
+    /// <param name="request">Watermark PDF request payload. See <see cref="WatermarkPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Watermarked document metadata response.</returns>
     public PdfGateDocumentResponse WatermarkPdf(
@@ -267,7 +268,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Applies a watermark to a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Watermark PDF request payload.</param>
+    /// <param name="request">Watermark PDF request payload. See <see cref="WatermarkPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Watermarked document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> WatermarkPdfAsync(
@@ -293,7 +294,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Protects a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Protect PDF request payload.</param>
+    /// <param name="request">Protect PDF request payload. See <see cref="ProtectPdfRequest" />.</param>
     /// <returns>Protected document metadata response.</returns>
     public PdfGateDocumentResponse ProtectPdf(
         ProtectPdfRequest request)
@@ -304,7 +305,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Protects a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Protect PDF request payload.</param>
+    /// <param name="request">Protect PDF request payload. See <see cref="ProtectPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Protected document metadata response.</returns>
     public PdfGateDocumentResponse ProtectPdf(
@@ -327,7 +328,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Protects a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Protect PDF request payload.</param>
+    /// <param name="request">Protect PDF request payload. See <see cref="ProtectPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Protected document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> ProtectPdfAsync(
@@ -350,7 +351,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Compresses a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Compress PDF request payload.</param>
+    /// <param name="request">Compress PDF request payload. See <see cref="CompressPdfRequest" />.</param>
     /// <returns>Compressed document metadata response.</returns>
     public PdfGateDocumentResponse CompressPdf(
         CompressPdfRequest request)
@@ -361,7 +362,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Compresses a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Compress PDF request payload.</param>
+    /// <param name="request">Compress PDF request payload. See <see cref="CompressPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Compressed document metadata response.</returns>
     public PdfGateDocumentResponse CompressPdf(
@@ -384,7 +385,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Compresses a PDF and returns document metadata.
     /// </summary>
-    /// <param name="request">Compress PDF request payload.</param>
+    /// <param name="request">Compress PDF request payload. See <see cref="CompressPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Compressed document metadata response.</returns>
     public async Task<PdfGateDocumentResponse> CompressPdfAsync(
@@ -407,7 +408,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Extracts PDF form fields and their values.
     /// </summary>
-    /// <param name="request">Extract PDF form data request payload.</param>
+    /// <param name="request">Extract PDF form data request payload. See <see cref="ExtractPdfFormDataRequest" />.</param>
     /// <returns>JSON object containing extracted form field values.</returns>
     public JsonElement ExtractPdfFormData(
         ExtractPdfFormDataRequest request)
@@ -418,7 +419,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Extracts PDF form fields and their values.
     /// </summary>
-    /// <param name="request">Extract PDF form data request payload.</param>
+    /// <param name="request">Extract PDF form data request payload. See <see cref="ExtractPdfFormDataRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>JSON object containing extracted form field values.</returns>
     public JsonElement ExtractPdfFormData(
@@ -441,7 +442,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Extracts PDF form fields and their values.
     /// </summary>
-    /// <param name="request">Extract PDF form data request payload.</param>
+    /// <param name="request">Extract PDF form data request payload. See <see cref="ExtractPdfFormDataRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>JSON object containing extracted form field values.</returns>
     public async Task<JsonElement> ExtractPdfFormDataAsync(
@@ -464,7 +465,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets metadata for a document by ID.
     /// </summary>
-    /// <param name="request">GetDocument request payload with the ID of the document to retrieve.</param>
+    /// <param name="request">GetDocument request payload with the ID of the document to retrieve. See <see cref="GetDocumentRequest" />.</param>
     /// <returns>Document metadata.</returns>
     public PdfGateDocumentResponse GetDocument(
         GetDocumentRequest request)
@@ -475,7 +476,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets metadata for a document by ID.
     /// </summary>
-    /// <param name="request">GetDocument request payload with the ID of the document to retrieve.</param>
+    /// <param name="request">GetDocument request payload with the ID of the document to retrieve. See <see cref="GetDocumentRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Document metadata.</returns>
     public PdfGateDocumentResponse GetDocument(
@@ -498,7 +499,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets metadata for a document by ID.
     /// </summary>
-    /// <param name="request">GetDocument request payload with the ID of the document to retrieve.</param>
+    /// <param name="request">GetDocument request payload with the ID of the document to retrieve. See <see cref="GetDocumentRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Document metadata.</returns>
     public async Task<PdfGateDocumentResponse> GetDocumentAsync(
@@ -522,7 +523,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets a file by its ID
     /// </summary>
-    /// <param name="request">GetFile request payload with the ID of the document to download.</param>
+    /// <param name="request">GetFile request payload with the ID of the document to download. See <see cref="GetFileRequest" />.</param>
     /// <returns>A stream to the file's content.</returns>
     public Stream GetFile(
         GetFileRequest request)
@@ -533,7 +534,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets a file by its ID
     /// </summary>
-    /// <param name="request">GetFile request payload with the ID of the document to download.</param>
+    /// <param name="request">GetFile request payload with the ID of the document to download. See <see cref="GetFileRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A stream to the file's content.</returns>
     public Stream GetFile(
@@ -555,7 +556,7 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets a file by its ID
     /// </summary>
-    /// <param name="request">GetFile request payload with the ID of the document to download.</param>
+    /// <param name="request">GetFile request payload with the ID of the document to download. See <see cref="GetFileRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A stream to the file's content.</returns>
     public async Task<Stream> GetFileAsync(
@@ -580,7 +581,7 @@ public sealed class PdfGate : IDisposable
     ///     The stream passed in the request is owned by the caller so it must
     ///     be disposed by the caller.
     /// </summary>
-    /// <param name="request">UploadFile request payload holds the file.</param>
+    /// <param name="request">UploadFile request payload holds the file. See <see cref="UploadFileRequest" />.</param>
     /// <returns>The uploaded document metadata to use to operate on it</returns>
     public PdfGateDocumentResponse UploadFile(
         UploadFileRequest request)
@@ -593,7 +594,7 @@ public sealed class PdfGate : IDisposable
     ///     The stream passed in the request is owned by the caller so it must
     ///     be disposed by the caller.
     /// </summary>
-    /// <param name="request">UploadFile request payload holds the file.</param>
+    /// <param name="request">UploadFile request payload holds the file. See <see cref="UploadFileRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The uploaded document metadata to use to operate on it</returns>
     public PdfGateDocumentResponse UploadFile(
@@ -622,7 +623,7 @@ public sealed class PdfGate : IDisposable
     ///     The stream passed in the request is owned by the caller so it must
     ///     be disposed by the caller.
     /// </summary>
-    /// <param name="request">UploadFile request payload holds the file.</param>
+    /// <param name="request">UploadFile request payload holds the file. See <see cref="UploadFileRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The uploaded document metadata to use to operate on it</returns>
     public async Task<PdfGateDocumentResponse> UploadFileAsync(
