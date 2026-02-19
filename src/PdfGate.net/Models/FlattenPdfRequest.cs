@@ -6,7 +6,7 @@ namespace PdfGate.net.Models;
 public sealed record FlattenPdfRequest
 {
     /// <summary>
-    ///     Existing stored PDF document ID..
+    ///     Existing stored PDF document ID.
     /// </summary>
     public string? DocumentId
     {
