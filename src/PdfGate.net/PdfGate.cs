@@ -8,6 +8,18 @@ namespace PdfGate.net;
 /// <summary>
 ///     Client used to interact with the PDFGate HTTP API.
 ///     Full documentation of the API: https://pdfgate.com/documentation
+///
+///     There are 3 types of operations you can perform, and they usually follow
+///     this order:
+///
+///     1. Create a PDF to operate on: GeneratePdf, and UploadFile will store a
+///     new PDF that you can then operate on, and return its Document ID so you
+///     can reference it on your transformation requests.
+///     2. Transform a PDF: methods like FlattenPdf, ExtractPdfFormData,
+///     WatermarkPdf, etc. will transform a PDF in a meaningful way and return
+///     the Document ID of the result so you can download it.
+///     3. Download a PDF: after you made the transformations you needed on a
+///     PDF you can download it with GetFile.
 /// </summary>
 public sealed class PdfGate : IDisposable
 {
@@ -172,7 +184,7 @@ public sealed class PdfGate : IDisposable
 
 
     /// <summary>
-    ///     Flattens a PDF and returns document metadata.
+    ///     Flatten an interactive PDF into a static, non-editable PDF.
     /// </summary>
     /// <param name="request">Flatten PDF request payload. See <see cref="FlattenPdfRequest" />.</param>
     /// <returns>Flattened document metadata response.</returns>
