@@ -1,5 +1,8 @@
 namespace PdfGate.net.Models;
 
+/// <summary>
+///     Request payload used for the UploadFile endpoint.
+/// </summary>
 public sealed record UploadFileRequest
 {
     /// <summary>
