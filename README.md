@@ -49,7 +49,8 @@ You can find the full HTTP API documentation [here][api-docs] and there's code d
 
 ## Usage
 
-First, you will always need a client to interact with the API:
+First, you will always need a client to interact with the API. The only thing
+you need to create a client is your API key for authentication (more details about authentication [here][authentication]):
 
 ```csharp
 using System.Text.Json;
@@ -245,9 +246,8 @@ PdfGateDocumentResponse documentWithRefreshedUrl = await client.GetDocumentAsync
     CancellationToken.None);
 ```
 
-
-
 [dotnet-core-cli-tools]: https://docs.microsoft.com/en-us/dotnet/core/tools/
 [nuget-cli]: https://docs.microsoft.com/en-us/nuget/tools/nuget-exe-cli-reference
 [package-manager-console]: https://docs.microsoft.com/en-us/nuget/tools/package-manager-console
 [api-docs]: https://pdfgate.com/documentation
+[authentication]: https://pdfgate.com/documentation#authentication
