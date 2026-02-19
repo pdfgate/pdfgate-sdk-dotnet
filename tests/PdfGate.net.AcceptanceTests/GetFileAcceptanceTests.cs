@@ -29,7 +29,7 @@ public sealed class
     [Fact]
     public async Task GetFileAsync_ReturnsStreamWithFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse document =
             await _documentFixture.GetDocumentOrSkipAsync(client);
         var getFileRequest = new GetFileRequest { DocumentId = document.Id };
@@ -54,7 +54,7 @@ public sealed class
     [Fact]
     public void GetFile_ReturnsStreamWithFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse document =
             _documentFixture.GetDocumentOrSkip(client);
         var getFileRequest = new GetFileRequest { DocumentId = document.Id };

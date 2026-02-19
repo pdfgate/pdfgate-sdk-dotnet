@@ -27,7 +27,7 @@ public sealed class
     [Fact]
     public async Task GetDocumentAsync_ReturnsFixtureDocumentWithCompletedStatus()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             await _documentFixture.GetDocumentOrSkipAsync(client);
 
@@ -50,7 +50,7 @@ public sealed class
     [Fact]
     public void GetDocument_ReturnsFixtureDocumentWithCompletedStatus()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             _documentFixture.GetDocumentOrSkip(client);
 

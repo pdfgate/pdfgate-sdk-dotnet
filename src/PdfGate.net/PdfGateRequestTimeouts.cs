@@ -1,7 +1,7 @@
 namespace PdfGate.net;
 
 /// <summary>
-///     Per-endpoint request timeouts used by <see cref="PdfGate" /> when wrapping user cancellation tokens.
+///     Per-endpoint request timeouts used by <see cref="PdfGateClient" /> when wrapping user cancellation tokens.
 /// </summary>
 public sealed class PdfGateRequestTimeouts
 {

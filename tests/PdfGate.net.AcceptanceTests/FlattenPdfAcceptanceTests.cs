@@ -27,7 +27,7 @@ public sealed class
     [Fact]
     public async Task FlattenPdfAsync_ByDocumentId_ReturnsCompletedStatus()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var generateRequest = new GeneratePdfRequest
         {
@@ -56,7 +56,7 @@ public sealed class
     [Fact]
     public void FlattenPdf_ByDocumentId_ReturnsCompletedStatus()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var generateRequest = new GeneratePdfRequest
         {
@@ -86,7 +86,7 @@ public sealed class
     public async Task
         FlattenPdfAsync_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new FlattenPdfRequest();
 
@@ -106,7 +106,7 @@ public sealed class
     [Fact]
     public void FlattenPdf_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new FlattenPdfRequest();
 

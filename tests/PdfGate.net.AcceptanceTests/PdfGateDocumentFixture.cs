@@ -12,7 +12,7 @@ public sealed class PdfGateDocumentFixture
     ///     Returns the configured client or skips the test when no API key is set.
     /// </summary>
     public async Task<PdfGateDocumentResponse> GetDocumentOrSkipAsync(
-        PdfGate? client)
+        PdfGateClient? client)
     {
         if (_document != null)
             return _document;
@@ -40,7 +40,7 @@ public sealed class PdfGateDocumentFixture
     /// <summary>
     ///     Returns the configured client or skips the test when no API key is set.
     /// </summary>
-    public PdfGateDocumentResponse GetDocumentOrSkip(PdfGate? client)
+    public PdfGateDocumentResponse GetDocumentOrSkip(PdfGateClient? client)
     {
         if (_document != null)
             return _document;

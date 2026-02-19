@@ -27,7 +27,7 @@ public sealed class
     [Fact]
     public async Task GeneratePdfAsync_ReturnsCompletedStatus()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new GeneratePdfRequest
         {
@@ -48,7 +48,7 @@ public sealed class
     [Fact]
     public void GeneratePdf_ReturnsCompletedStatus()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new GeneratePdfRequest
         {
@@ -69,7 +69,7 @@ public sealed class
     [Fact]
     public async Task GeneratePdfAsync_AcceptsEnumParams()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new GeneratePdfRequest
         {
@@ -95,7 +95,7 @@ public sealed class
     [Fact]
     public void GeneratePdf_AcceptsEnumParams()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new GeneratePdfRequest
         {
@@ -122,7 +122,7 @@ public sealed class
     public async Task
         GeneratePdfAsync_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new GeneratePdfRequest();
 
@@ -143,7 +143,7 @@ public sealed class
     public void
         GeneratePdf_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request = new GeneratePdfRequest();
 

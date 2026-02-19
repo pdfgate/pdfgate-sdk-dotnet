@@ -29,7 +29,7 @@ public sealed class
     [Fact]
     public async Task ExtractPdfFormDataAsync_ByDocumentId_ReturnsFieldValues()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
         PdfGateDocumentResponse source = await CreateDocumentWithFormAsync(
             client);
 
@@ -49,7 +49,7 @@ public sealed class
     [Fact]
     public void ExtractPdfFormData_ByDocumentId_ReturnsFieldValues()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
         PdfGateDocumentResponse source = CreateDocumentWithForm(client);
 
         var request =
@@ -69,7 +69,7 @@ public sealed class
     public async Task
         ExtractPdfFormDataAsync_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request =
             new ExtractPdfFormDataRequest { DocumentId = "invalid-id" };
@@ -90,7 +90,7 @@ public sealed class
     [Fact]
     public void ExtractPdfFormData_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _fixture.GetClientOrSkip();
+        PdfGateClient client = _fixture.GetClientOrSkip();
 
         var request =
             new ExtractPdfFormDataRequest { DocumentId = "invalid-id" };
@@ -106,7 +106,7 @@ public sealed class
     }
 
     private static async Task<PdfGateDocumentResponse> CreateDocumentWithFormAsync(
-        PdfGate client)
+        PdfGateClient client)
     {
         var generateRequest = new GeneratePdfRequest
         {
@@ -119,7 +119,7 @@ public sealed class
             TestContext.Current.CancellationToken);
     }
 
-    private static PdfGateDocumentResponse CreateDocumentWithForm(PdfGate client)
+    private static PdfGateDocumentResponse CreateDocumentWithForm(PdfGateClient client)
     {
         var generateRequest = new GeneratePdfRequest
         {

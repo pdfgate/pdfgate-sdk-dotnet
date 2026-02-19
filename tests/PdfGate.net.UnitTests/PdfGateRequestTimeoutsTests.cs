@@ -32,7 +32,7 @@ public sealed class PdfGateRequestTimeoutsTests
 
         var exception =
             Assert.Throws<ArgumentOutOfRangeException>(() =>
-                new PdfGate("live_test_key", timeouts));
+                new PdfGateClient("live_test_key", timeouts));
 
         Assert.Equal("GeneratePdf", exception.ParamName);
     }
@@ -53,7 +53,7 @@ public sealed class PdfGateRequestTimeoutsTests
     public async Task AllPublicCancellationTokenOverloads_UseWrappedToken()
     {
         var handler = new RecordingHttpMessageHandler();
-        using var client = new PdfGate("live_test_key", handler,
+        using var client = new PdfGateClient("live_test_key", handler,
             new PdfGateRequestTimeouts());
 
         _ = client.GeneratePdf(new GeneratePdfRequest { Html = "<p>x</p>" },

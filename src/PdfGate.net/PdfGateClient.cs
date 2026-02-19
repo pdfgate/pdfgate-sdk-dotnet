@@ -19,7 +19,7 @@ namespace PdfGate.net;
 ///     3. Download a PDF: after you made the transformations you needed on a
 ///     PDF you can download it with GetFile.
 /// </summary>
-public sealed class PdfGate : IDisposable
+public sealed class PdfGateClient : IDisposable
 {
     private static readonly Uri ProductionApiUri =
         new("https://api.pdfgate.com/");
@@ -42,12 +42,12 @@ public sealed class PdfGate : IDisposable
     private readonly PdfGateRequestTimeouts _requestTimeouts;
     private readonly PdfGateResponseParser _responseParser;
 
-    internal PdfGate(string apiKey, HttpMessageHandler httpMessageHandler)
+    internal PdfGateClient(string apiKey, HttpMessageHandler httpMessageHandler)
         : this(apiKey, httpMessageHandler, new PdfGateRequestTimeouts())
     {
     }
 
-    internal PdfGate(string apiKey, HttpMessageHandler httpMessageHandler,
+    internal PdfGateClient(string apiKey, HttpMessageHandler httpMessageHandler,
         PdfGateRequestTimeouts requestTimeouts)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
@@ -65,20 +65,20 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Creates a new <see cref="PdfGate" /> instance.
+    ///     Creates a new <see cref="PdfGateClient" /> instance.
     /// </summary>
     /// <param name="apiKey">The API key for the PDFGate HTTP API; "test_" for sandbox or "live_" for production.</param>
-    public PdfGate(string apiKey)
+    public PdfGateClient(string apiKey)
         : this(apiKey, new PdfGateRequestTimeouts())
     {
     }
 
     /// <summary>
-    ///     Creates a new <see cref="PdfGate" /> instance.
+    ///     Creates a new <see cref="PdfGateClient" /> instance.
     /// </summary>
     /// <param name="apiKey">The API key for the PDFGate HTTP API; either sandbox or production.</param>
     /// <param name="requestTimeouts">Per-endpoint request timeout configuration.</param>
-    internal PdfGate(string apiKey, PdfGateRequestTimeouts requestTimeouts)
+    internal PdfGateClient(string apiKey, PdfGateRequestTimeouts requestTimeouts)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("An API key is required.");

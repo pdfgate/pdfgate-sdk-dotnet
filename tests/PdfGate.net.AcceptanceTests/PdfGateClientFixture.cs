@@ -31,7 +31,7 @@ public sealed class PdfGateClientFixture : IDisposable
     private const string MissingApiKeyMessage =
         "Set PDFGATE_API_KEY to run acceptance tests.";
 
-    private readonly PdfGate? _client;
+    private readonly PdfGateClient? _client;
 
     /// <summary>
     ///     Initializes the client when a test API key is available.
@@ -47,7 +47,7 @@ public sealed class PdfGateClientFixture : IDisposable
             };
             var throttledHandler = new AcceptanceTestRateLimitedHandler(
                 socketsHandler);
-            _client = new PdfGate(apiKey, throttledHandler);
+            _client = new PdfGateClient(apiKey, throttledHandler);
         }
     }
 
@@ -60,7 +60,7 @@ public sealed class PdfGateClientFixture : IDisposable
     /// <summary>
     ///     Returns the configured client or skips the test when no API key is set.
     /// </summary>
-    public PdfGate GetClientOrSkip()
+    public PdfGateClient GetClientOrSkip()
     {
         if (_client is null)
             Assert.Skip(MissingApiKeyMessage);

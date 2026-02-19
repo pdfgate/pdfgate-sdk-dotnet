@@ -34,7 +34,7 @@ public sealed class
     public async Task
         WatermarkPdfAsync_ByDocumentIdWithText_ReturnsCompletedStatus()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             await _documentFixture.GetDocumentOrSkipAsync(client);
         PdfGateFile fontFile = CreateFontFileOrSkip();
@@ -69,7 +69,7 @@ public sealed class
     [Fact]
     public void WatermarkPdf_ByDocumentIdWithText_ReturnsCompletedStatus()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             _documentFixture.GetDocumentOrSkip(client);
         PdfGateFile fontFile = CreateFontFileOrSkip();
@@ -105,7 +105,7 @@ public sealed class
     public async Task
         WatermarkPdfAsync_ByDocumentIdWithImage_ReturnsCompletedStatus()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             await _documentFixture.GetDocumentOrSkipAsync(client);
 
@@ -142,7 +142,7 @@ public sealed class
     [Fact]
     public void WatermarkPdf_ByDocumentIdWithImage_ReturnsCompletedStatus()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             _documentFixture.GetDocumentOrSkip(client);
 
@@ -180,7 +180,7 @@ public sealed class
     public async Task
         WatermarkPdfAsync_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         var request = new WatermarkPdfRequest
         {
             DocumentId = "invalid-id",
@@ -204,7 +204,7 @@ public sealed class
     [Fact]
     public void WatermarkPdf_WhenApiReturnsError_ThrowsPdfGateExceptionWithApiMessage()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         var request = new WatermarkPdfRequest
         {
             DocumentId = "invalid-id",

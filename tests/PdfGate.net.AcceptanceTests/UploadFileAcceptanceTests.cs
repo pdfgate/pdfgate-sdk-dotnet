@@ -27,7 +27,7 @@ public class
     [Fact]
     public async Task UploadFileAsync_UploadsFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse document =
             await _documentFixture.GetDocumentOrSkipAsync(client);
         var getFileRequest = new GetFileRequest { DocumentId = document.Id };
@@ -49,7 +49,7 @@ public class
     [Fact]
     public void UploadFile_UploadsFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse document =
             _documentFixture.GetDocumentOrSkip(client);
         var getFileRequest = new GetFileRequest { DocumentId = document.Id };
@@ -71,7 +71,7 @@ public class
     [Fact]
     public async Task UploadFileAsync_UploadsFileByUrl()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse document =
             await _documentFixture.GetDocumentOrSkipAsync(client);
         var request = new UploadFileRequest
@@ -93,7 +93,7 @@ public class
     [Fact]
     public void UploadFile_UploadsFileByUrl()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse document =
             _documentFixture.GetDocumentOrSkip(client);
         var request = new UploadFileRequest

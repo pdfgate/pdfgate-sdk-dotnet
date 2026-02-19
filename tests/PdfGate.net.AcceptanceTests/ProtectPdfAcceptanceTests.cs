@@ -37,7 +37,7 @@ public sealed class
     public async Task
         ProtectPdfAsync_ByDocumentIdWithAllRequestValuesAes256_ReturnsEncryptedDocumentAndEncryptedFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             await _documentFixture.GetDocumentOrSkipAsync(client);
 
@@ -85,7 +85,7 @@ public sealed class
     public void
         ProtectPdf_ByDocumentIdWithAllRequestValuesAes256_ReturnsEncryptedDocumentAndEncryptedFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             _documentFixture.GetDocumentOrSkip(client);
 

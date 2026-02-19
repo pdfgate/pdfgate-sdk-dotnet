@@ -32,7 +32,7 @@ public sealed class
     public async Task
         CompressPdfAsync_ByDocumentId_ReturnsCompressedCompletedAndSmallerFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             await _documentFixture.GetDocumentOrSkipAsync(client);
 
@@ -83,7 +83,7 @@ public sealed class
     [Fact]
     public void CompressPdf_ByDocumentId_ReturnsCompressedCompletedAndSmallerFile()
     {
-        PdfGate client = _clientFixture.GetClientOrSkip();
+        PdfGateClient client = _clientFixture.GetClientOrSkip();
         PdfGateDocumentResponse source =
             _documentFixture.GetDocumentOrSkip(client);
 
