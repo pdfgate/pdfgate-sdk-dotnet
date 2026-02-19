@@ -54,8 +54,8 @@ you need to create a client is your API key for authentication (more details abo
 
 ```csharp
 using System.Text.Json;
-using PdfGate.net;
-using PdfGate.net.Models;
+using PdfGate.@net;
+using PdfGate.@net.Models;
 
 internal static class Program
 {
