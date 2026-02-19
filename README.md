@@ -214,7 +214,7 @@ JsonElement formData = await client.ExtractPdfFormDataAsync(
 
 ### PDF Sharing
 
-In the case that you don't need the actual resulting PDF file, you just need to share a way for other clients
+In the case that you don't need the actual resulting PDF file, you just need to a way for other clients
 or users to access it, you can do so by requesting on any method that the response includes a pre-signed URL:
 
 ```csharp
