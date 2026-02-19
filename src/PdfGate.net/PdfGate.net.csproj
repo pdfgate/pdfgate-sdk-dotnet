@@ -1,14 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
 
-    <ItemGroup>
-        <PackageReference Include="System.Text.Json" Version="8.0.5" />
-    </ItemGroup>
+    <PackageId>PdfGate.net</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>PDFGate</Authors>
+    <Description>Official .NET SDK for the PDFGate HTTP API.</Description>
+    <PackageTags>pdf;pdfgate;sdk</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/pdfgate/pdfgate-sdk-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://pdfgate.com</PackageProjectUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
 
 </Project>
