@@ -8,10 +8,8 @@ namespace PdfGate.net;
 /// <summary>
 ///     Client used to interact with the PDFGate HTTP API.
 ///     Full documentation of the API: https://pdfgate.com/documentation
-///
 ///     There are 3 types of operations you can perform, and they usually follow
 ///     this order:
-///
 ///     1. Create a PDF to operate on: GeneratePdf, and UploadFile will store a
 ///     new PDF that you can then operate on, and return its Document ID so you
 ///     can reference it on your transformation requests.
@@ -195,7 +193,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Flattens a PDF and returns document metadata.
+    ///     Flatten an interactive PDF into a static, non-editable PDF.
     /// </summary>
     /// <param name="request">Flatten PDF request payload. See <see cref="FlattenPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -218,7 +216,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Flattens a PDF and returns document metadata.
+    ///     Flatten an interactive PDF into a static, non-editable PDF.
     /// </summary>
     /// <param name="request">Flatten PDF request payload. See <see cref="FlattenPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -241,7 +239,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Applies a watermark to a PDF and returns document metadata.
+    ///     Apply a text or image watermark to a PDF.
     /// </summary>
     /// <param name="request">Watermark PDF request payload. See <see cref="WatermarkPdfRequest" />.</param>
     /// <returns>Watermarked document metadata response.</returns>
@@ -252,7 +250,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Applies a watermark to a PDF and returns document metadata.
+    ///     Apply a text or image watermark to a PDF.
     /// </summary>
     /// <param name="request">Watermark PDF request payload. See <see cref="WatermarkPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -278,7 +276,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Applies a watermark to a PDF and returns document metadata.
+    ///     Apply a text or image watermark to a PDF.
     /// </summary>
     /// <param name="request">Watermark PDF request payload. See <see cref="WatermarkPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -304,7 +302,14 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Protects a PDF and returns document metadata.
+    ///     Protect a PDF by requiring a password to view it.
+    ///     It can further restrict usage of the PDF by disabling:
+    ///     - printing
+    ///     - copying
+    ///     - editing
+    ///     The metadata of the document (title, author, etc.) can be kept
+    ///     visible, even to users without the password, by disabling the param
+    ///     `encryptMetadata` in the request.
     /// </summary>
     /// <param name="request">Protect PDF request payload. See <see cref="ProtectPdfRequest" />.</param>
     /// <returns>Protected document metadata response.</returns>
@@ -315,7 +320,14 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Protects a PDF and returns document metadata.
+    ///     Protect a PDF by requiring a password to view it.
+    ///     It can further restrict usage of the PDF by disabling:
+    ///     - printing
+    ///     - copying
+    ///     - editing
+    ///     The metadata of the document (title, author, etc.) can be kept
+    ///     visible, even to users without the password, by disabling the param
+    ///     `encryptMetadata` in the request.
     /// </summary>
     /// <param name="request">Protect PDF request payload. See <see cref="ProtectPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -338,7 +350,14 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Protects a PDF and returns document metadata.
+    ///     Protect a PDF by requiring a password to view it.
+    ///     It can further restrict usage of the PDF by disabling:
+    ///     - printing
+    ///     - copying
+    ///     - editing
+    ///     The metadata of the document (title, author, etc.) can be kept
+    ///     visible, even to users without the password, by disabling the param
+    ///     `encryptMetadata` in the request.
     /// </summary>
     /// <param name="request">Protect PDF request payload. See <see cref="ProtectPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -361,7 +380,9 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Compresses a PDF and returns document metadata.
+    ///     Reduce a PDF's file size without changing its visual appearence.
+    ///     Enable linearization to allow faster streaming when serving the file
+    ///     over the network.
     /// </summary>
     /// <param name="request">Compress PDF request payload. See <see cref="CompressPdfRequest" />.</param>
     /// <returns>Compressed document metadata response.</returns>
@@ -372,7 +393,9 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Compresses a PDF and returns document metadata.
+    ///     Reduce a PDF's file size without changing its visual appearence.
+    ///     Enable linearization to allow faster streaming when serving the file
+    ///     over the network.
     /// </summary>
     /// <param name="request">Compress PDF request payload. See <see cref="CompressPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -395,7 +418,9 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Compresses a PDF and returns document metadata.
+    ///     Reduce a PDF's file size without changing its visual appearence.
+    ///     Enable linearization to allow faster streaming when serving the file
+    ///     over the network.
     /// </summary>
     /// <param name="request">Compress PDF request payload. See <see cref="CompressPdfRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -418,7 +443,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Extracts PDF form fields and their values.
+    ///     Extract form field data from a fillable PDF and return it as JSON.
     /// </summary>
     /// <param name="request">Extract PDF form data request payload. See <see cref="ExtractPdfFormDataRequest" />.</param>
     /// <returns>JSON object containing extracted form field values.</returns>
@@ -429,7 +454,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Extracts PDF form fields and their values.
+    ///     Extract form field data from a fillable PDF and return it as JSON.
     /// </summary>
     /// <param name="request">Extract PDF form data request payload. See <see cref="ExtractPdfFormDataRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -452,7 +477,7 @@ public sealed class PdfGate : IDisposable
     }
 
     /// <summary>
-    ///     Extracts PDF form fields and their values.
+    ///     Extract form field data from a fillable PDF and return it as JSON.
     /// </summary>
     /// <param name="request">Extract PDF form data request payload. See <see cref="ExtractPdfFormDataRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -477,7 +502,10 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets metadata for a document by ID.
     /// </summary>
-    /// <param name="request">GetDocument request payload with the ID of the document to retrieve. See <see cref="GetDocumentRequest" />.</param>
+    /// <param name="request">
+    ///     GetDocument request payload with the ID of the document to retrieve. See
+    ///     <see cref="GetDocumentRequest" />.
+    /// </param>
     /// <returns>Document metadata.</returns>
     public PdfGateDocumentResponse GetDocument(
         GetDocumentRequest request)
@@ -488,7 +516,10 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets metadata for a document by ID.
     /// </summary>
-    /// <param name="request">GetDocument request payload with the ID of the document to retrieve. See <see cref="GetDocumentRequest" />.</param>
+    /// <param name="request">
+    ///     GetDocument request payload with the ID of the document to retrieve. See
+    ///     <see cref="GetDocumentRequest" />.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Document metadata.</returns>
     public PdfGateDocumentResponse GetDocument(
@@ -511,7 +542,10 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets metadata for a document by ID.
     /// </summary>
-    /// <param name="request">GetDocument request payload with the ID of the document to retrieve. See <see cref="GetDocumentRequest" />.</param>
+    /// <param name="request">
+    ///     GetDocument request payload with the ID of the document to retrieve. See
+    ///     <see cref="GetDocumentRequest" />.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Document metadata.</returns>
     public async Task<PdfGateDocumentResponse> GetDocumentAsync(
@@ -535,7 +569,10 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets a file by its ID
     /// </summary>
-    /// <param name="request">GetFile request payload with the ID of the document to download. See <see cref="GetFileRequest" />.</param>
+    /// <param name="request">
+    ///     GetFile request payload with the ID of the document to download. See
+    ///     <see cref="GetFileRequest" />.
+    /// </param>
     /// <returns>A stream to the file's content.</returns>
     public Stream GetFile(
         GetFileRequest request)
@@ -546,7 +583,10 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets a file by its ID
     /// </summary>
-    /// <param name="request">GetFile request payload with the ID of the document to download. See <see cref="GetFileRequest" />.</param>
+    /// <param name="request">
+    ///     GetFile request payload with the ID of the document to download. See
+    ///     <see cref="GetFileRequest" />.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A stream to the file's content.</returns>
     public Stream GetFile(
@@ -568,7 +608,10 @@ public sealed class PdfGate : IDisposable
     /// <summary>
     ///     Gets a file by its ID
     /// </summary>
-    /// <param name="request">GetFile request payload with the ID of the document to download. See <see cref="GetFileRequest" />.</param>
+    /// <param name="request">
+    ///     GetFile request payload with the ID of the document to download. See
+    ///     <see cref="GetFileRequest" />.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A stream to the file's content.</returns>
     public async Task<Stream> GetFileAsync(
