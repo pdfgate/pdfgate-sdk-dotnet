@@ -246,6 +246,61 @@ PdfGateDocumentResponse documentWithRefreshedUrl = await client.GetDocumentAsync
     CancellationToken.None);
 ```
 
+## Development
+
+### Prerequisites
+
+- .NET SDK 8.0+ (used by the test projects and CI)
+
+### Restore dependencies
+
+```sh
+dotnet restore PdfGate.sln
+```
+
+### Build
+
+```sh
+dotnet build PdfGate.sln
+```
+
+### Format
+
+```sh
+dotnet format PdfGate.sln
+```
+
+### Run tests
+
+Run all tests:
+
+```sh
+dotnet test PdfGate.sln
+```
+
+Run only unit tests:
+
+```sh
+dotnet test tests/PdfGate.net.UnitTests/PdfGate.net.UnitTests.csproj
+```
+
+Run acceptance tests (single-threaded, no node reuse):
+
+```sh
+dotnet test tests/PdfGate.net.AcceptanceTests/PdfGate.net.AcceptanceTests.csproj /m:1 /nr:false
+```
+
+### Acceptance test setup
+
+Acceptance tests call the real PDFGate API and require an API key in `PDFGATE_API_KEY`.
+
+```sh
+export PDFGATE_API_KEY="test_your_api_key_here"
+```
+
+If `PDFGATE_API_KEY` is not set, acceptance tests are skipped.
+
+
 [dotnet-core-cli-tools]: https://docs.microsoft.com/en-us/dotnet/core/tools/
 [nuget-cli]: https://docs.microsoft.com/en-us/nuget/tools/nuget-exe-cli-reference
 [package-manager-console]: https://docs.microsoft.com/en-us/nuget/tools/package-manager-console
