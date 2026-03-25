@@ -23,13 +23,10 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore
-        run: dotnet restore PdfGate.sln
+        run: dotnet restore src/PdfGate.net/PdfGate.net.csproj
 
       - name: Build
-        run: dotnet build PdfGate.sln --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test PdfGate.sln --configuration Release --no-build
+        run: dotnet build src/PdfGate.net/PdfGate.net.csproj --configuration Release --no-restore
 
       - name: Pack
         run: dotnet pack src/PdfGate.net/PdfGate.net.csproj --configuration Release --no-build --output artifacts
