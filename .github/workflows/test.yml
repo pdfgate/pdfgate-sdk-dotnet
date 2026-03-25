@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore PdfGate.sln
+
+      - name: Build
+        run: dotnet build PdfGate.sln --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test tests/PdfGate.net.UnitTests/PdfGate.net.UnitTests.csproj --configuration Release --no-build
