@@ -310,6 +310,27 @@ PdfGateDocumentResponse documentWithRefreshedUrl = await client.GetDocumentAsync
     CancellationToken.None);
 ```
 
+### Webhooks
+
+Use `PdfGateWebhook.VerifySignature` to validate the
+`x-pdfgate-signature` header against the raw request body before
+processing a webhook.
+
+```csharp
+using System.Text;
+using PdfGate.@net;
+
+string secret = "whsecret_...";
+string signatureHeader = request.Headers["x-pdfgate-signature"];
+byte[] rawBody = Encoding.UTF8.GetBytes(requestBody);
+
+PdfGateWebhook.VerifySignature(secret, signatureHeader, rawBody);
+```
+
+The helper rejects requests when the signature is missing, the timestamp is
+missing, the timestamp is older than 5 minutes, or none of the `v1`
+signatures matches the expected HMAC-SHA256 signature.
+
 ## Development
 
 ### Prerequisites
