@@ -292,6 +292,60 @@ public sealed class PdfGateClient : IDisposable
         return _responseParser.ParseEnvelope(content, url);
     }
 
+    /// <summary>
+    ///     Gets the current state of an envelope by its identifier.
+    /// </summary>
+    /// <param name="request">Get envelope request payload. See <see cref="GetEnvelopeRequest" />.</param>
+    /// <returns>Current envelope metadata response.</returns>
+    public PdfGateEnvelope GetEnvelope(
+        GetEnvelopeRequest request)
+    {
+        return GetEnvelope(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Gets the current state of an envelope by its identifier.
+    /// </summary>
+    /// <param name="request">Get envelope request payload. See <see cref="GetEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Current envelope metadata response.</returns>
+    public PdfGateEnvelope GetEnvelope(
+        GetEnvelopeRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetEnvelope(request.Id);
+        var content = _httpClient.Get(url, cts.Token);
+
+        return _responseParser.ParseEnvelope(content, url);
+    }
+
+    /// <summary>
+    ///     Gets the current state of an envelope by its identifier.
+    /// </summary>
+    /// <param name="request">Get envelope request payload. See <see cref="GetEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Current envelope metadata response.</returns>
+    public async Task<PdfGateEnvelope> GetEnvelopeAsync(
+        GetEnvelopeRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetEnvelope(request.Id);
+        var content = await _httpClient.GetAsync(url, cts.Token)
+            .ConfigureAwait(false);
+
+        return _responseParser.ParseEnvelope(content, url);
+    }
+
 
     /// <summary>
     ///     Flatten an interactive PDF into a static, non-editable PDF.

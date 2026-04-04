@@ -186,6 +186,20 @@ PdfGateDocumentResponse compressedDoc = await client.CompressPdfAsync(
     CancellationToken.None);
 ```
 
+These operations return a new Document ID that points to the transformed document.
+You can then download it with `GetFileAsync`:
+
+
+```csharp
+var getFileRequest = new GetFileRequest { DocumentId = transformedDoc.Id };
+
+Stream fileResponse = await client.GetFileAsync(getFileRequest, CancellationToken.None);
+```
+
+### Digital Signatures
+
+Use envelopes to manage recipient signing flows for documents with form fields.
+
 **Create an envelope**
 
 ```csharp
@@ -233,14 +247,17 @@ PdfGateEnvelope sentEnvelope = await client.SendEnvelopeAsync(
     CancellationToken.None);
 ```
 
-All of these operations will return a new Document ID that points to the document
-that resulted from this transformation. You can then download it with `GetFileAsync`:
-
+**Get an envelope**
 
 ```csharp
-var getFileRequest = new GetFileRequest { DocumentId = transformedDoc.Id };
+var getEnvelopeRequest = new GetEnvelopeRequest
+{
+    Id = envelope.Id
+};
 
-Stream fileResponse = await client.GetFileAsync(getFileRequest, CancellationToken.None);
+PdfGateEnvelope envelopeState = await client.GetEnvelopeAsync(
+    getEnvelopeRequest,
+    CancellationToken.None);
 ```
  
 ### PDF Data Extraction

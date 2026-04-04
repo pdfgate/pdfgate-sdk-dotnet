@@ -126,6 +126,20 @@ public sealed class PdfGateRequestTimeoutsTests
             }, CancellationToken.None);
         Assert.True(handler.LastCancellationToken.CanBeCanceled);
 
+        _ = client.GetEnvelope(
+            new GetEnvelopeRequest
+            {
+                Id = "env-id"
+            }, CancellationToken.None);
+        Assert.True(handler.LastCancellationToken.CanBeCanceled);
+
+        _ = await client.GetEnvelopeAsync(
+            new GetEnvelopeRequest
+            {
+                Id = "env-id"
+            }, CancellationToken.None);
+        Assert.True(handler.LastCancellationToken.CanBeCanceled);
+
         _ = client.FlattenPdf(new FlattenPdfRequest { DocumentId = "doc-id" },
             CancellationToken.None);
         Assert.True(handler.LastCancellationToken.CanBeCanceled);

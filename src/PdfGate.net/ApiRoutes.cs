@@ -33,4 +33,9 @@ internal static class ApiRoutes
     {
         return $"envelope/{Uri.EscapeDataString(envelopeId)}/send";
     }
+
+    internal static string GetEnvelope(string envelopeId)
+    {
+        return $"envelope/{Uri.EscapeDataString(envelopeId)}";
+    }
 }
