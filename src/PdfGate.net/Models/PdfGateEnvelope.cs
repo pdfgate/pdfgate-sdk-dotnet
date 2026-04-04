@@ -20,6 +20,7 @@ public sealed record PdfGateEnvelope
     /// <summary>
     ///     Envelope status.
     /// </summary>
+    [JsonConverter(typeof(NullableEnvelopeStatusJsonConverter))]
     public EnvelopeStatus? Status
     {
         get;
@@ -107,6 +108,7 @@ public sealed record EnvelopeDocumentResponse
     /// <summary>
     ///     Envelope document status.
     /// </summary>
+    [JsonConverter(typeof(NullableEnvelopeDocumentStatusJsonConverter))]
     public EnvelopeDocumentStatus? Status
     {
         get;
@@ -140,6 +142,7 @@ public sealed record EnvelopeRecipientResponse
     /// <summary>
     ///     Recipient status.
     /// </summary>
+    [JsonConverter(typeof(NullableDocumentRecipientStatusJsonConverter))]
     public DocumentRecipientStatus? Status
     {
         get;
@@ -191,6 +194,7 @@ public sealed record EnvelopeFieldResponse
     /// <summary>
     ///     Field type.
     /// </summary>
+    [JsonConverter(typeof(NullableDocumentFieldTypeJsonConverter))]
     public DocumentFieldType? Type
     {
         get;
@@ -381,6 +385,45 @@ internal sealed class EnvelopeStatusJsonConverter
     }
 }
 
+internal abstract class NullableStructJsonConverter<T>
+    : JsonConverter<T?> where T : struct
+{
+    protected abstract JsonConverter<T> InnerConverter
+    {
+        get;
+    }
+
+    public override T? Read(ref Utf8JsonReader reader,
+        Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Null)
+            return null;
+
+        return InnerConverter.Read(ref reader, typeof(T), options);
+    }
+
+    public override void Write(Utf8JsonWriter writer, T? value,
+        JsonSerializerOptions options)
+    {
+        if (value is null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
+        InnerConverter.Write(writer, value.Value, options);
+    }
+}
+
+internal sealed class NullableEnvelopeStatusJsonConverter
+    : NullableStructJsonConverter<EnvelopeStatus>
+{
+    protected override JsonConverter<EnvelopeStatus> InnerConverter
+    {
+        get;
+    } = new EnvelopeStatusJsonConverter();
+}
+
 internal sealed class EnvelopeDocumentStatusJsonConverter
     : JsonConverter<EnvelopeDocumentStatus>
 {
@@ -416,6 +459,15 @@ internal sealed class EnvelopeDocumentStatusJsonConverter
     }
 }
 
+internal sealed class NullableEnvelopeDocumentStatusJsonConverter
+    : NullableStructJsonConverter<EnvelopeDocumentStatus>
+{
+    protected override JsonConverter<EnvelopeDocumentStatus> InnerConverter
+    {
+        get;
+    } = new EnvelopeDocumentStatusJsonConverter();
+}
+
 internal sealed class DocumentRecipientStatusJsonConverter
     : JsonConverter<DocumentRecipientStatus>
 {
@@ -443,6 +495,15 @@ internal sealed class DocumentRecipientStatusJsonConverter
                 $"Unknown document recipient status value: '{value}'.")
         });
     }
+}
+
+internal sealed class NullableDocumentRecipientStatusJsonConverter
+    : NullableStructJsonConverter<DocumentRecipientStatus>
+{
+    protected override JsonConverter<DocumentRecipientStatus> InnerConverter
+    {
+        get;
+    } = new DocumentRecipientStatusJsonConverter();
 }
 
 internal sealed class DocumentFieldTypeJsonConverter
@@ -488,4 +549,13 @@ internal sealed class DocumentFieldTypeJsonConverter
                 $"Unknown document field type value: '{value}'.")
         });
     }
+}
+
+internal sealed class NullableDocumentFieldTypeJsonConverter
+    : NullableStructJsonConverter<DocumentFieldType>
+{
+    protected override JsonConverter<DocumentFieldType> InnerConverter
+    {
+        get;
+    } = new DocumentFieldTypeJsonConverter();
 }

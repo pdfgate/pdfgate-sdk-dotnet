@@ -220,6 +220,19 @@ PdfGateEnvelope envelope = await client.CreateEnvelopeAsync(
     CancellationToken.None);
 ```
 
+**Send an envelope**
+
+```csharp
+var sendEnvelopeRequest = new SendEnvelopeRequest
+{
+    Id = envelope.Id
+};
+
+PdfGateEnvelope sentEnvelope = await client.SendEnvelopeAsync(
+    sendEnvelopeRequest,
+    CancellationToken.None);
+```
+
 All of these operations will return a new Document ID that points to the document
 that resulted from this transformation. You can then download it with `GetFileAsync`:
 
