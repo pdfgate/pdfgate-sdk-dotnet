@@ -221,8 +221,7 @@ public sealed class PdfGateHttpClientTests
     private static PdfGateHttpClient CreateClient(
         Func<HttpRequestMessage, Task<HttpResponseMessage>> sendAsync)
     {
-        var handler = new DelegateHttpMessageHandler(sendAsync,
-            request => sendAsync(request).GetAwaiter().GetResult());
+        var handler = new TestHttpMessageHandler(sendAsync);
         return new PdfGateHttpClient(
             "live_test_key",
             new Uri("https://api.pdfgate.com/"),
@@ -232,32 +231,10 @@ public sealed class PdfGateHttpClientTests
     private static PdfGateHttpClient CreateClientSync(
         Func<HttpRequestMessage, HttpResponseMessage> send)
     {
-        var handler = new DelegateHttpMessageHandler(
-            request => Task.FromResult(send(request)),
-            send);
+        var handler = new TestHttpMessageHandler((request, _) => send(request));
         return new PdfGateHttpClient(
             "live_test_key",
             new Uri("https://api.pdfgate.com/"),
             handler, new JsonSerializerOptions());
-    }
-
-    private sealed class DelegateHttpMessageHandler(
-        Func<HttpRequestMessage, Task<HttpResponseMessage>> sendAsync,
-        Func<HttpRequestMessage, HttpResponseMessage> send)
-        : HttpMessageHandler
-    {
-        protected override HttpResponseMessage Send(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
-        {
-            return send(request);
-        }
-
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
-        {
-            return sendAsync(request);
-        }
     }
 }

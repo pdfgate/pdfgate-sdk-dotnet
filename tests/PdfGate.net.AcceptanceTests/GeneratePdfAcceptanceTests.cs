@@ -78,7 +78,10 @@ public sealed class
             PageSizeType = GeneratePdfPageSizeType.A4,
             Margin = new GeneratePdfPageMargin
             {
-                Top = "20px", Bottom = "20px", Left = "12px", Right = "12px"
+                Top = "20px",
+                Bottom = "20px",
+                Left = "12px",
+                Right = "12px"
             }
         };
 
@@ -104,7 +107,10 @@ public sealed class
             PageSizeType = GeneratePdfPageSizeType.A4,
             Margin = new GeneratePdfPageMargin
             {
-                Top = "20px", Bottom = "20px", Left = "12px", Right = "12px"
+                Top = "20px",
+                Bottom = "20px",
+                Left = "12px",
+                Right = "12px"
             }
         };
 

@@ -5,6 +5,7 @@ namespace PdfGate.net;
 internal static class ApiRoutes
 {
     internal const string GeneratePdf = "v1/generate/pdf";
+    internal const string CreateEnvelope = "envelope";
     internal const string FlattenPdf = "forms/flatten";
     internal const string ExtractPdfFormData = "forms/extract-data";
     internal const string WatermarkPdf = "watermark/pdf";

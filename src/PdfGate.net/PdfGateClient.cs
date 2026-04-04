@@ -180,6 +180,63 @@ public sealed class PdfGateClient : IDisposable
         return _responseParser.Parse(content, url);
     }
 
+    /// <summary>
+    ///     Creates a signing envelope from previously created source documents.
+    /// </summary>
+    /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
+    /// <returns>Created envelope metadata response.</returns>
+    public PdfGateEnvelope CreateEnvelope(
+        CreateEnvelopeRequest request)
+    {
+        return CreateEnvelope(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Creates a signing envelope from previously created source documents.
+    /// </summary>
+    /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Created envelope metadata response.</returns>
+    public PdfGateEnvelope CreateEnvelope(
+        CreateEnvelopeRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.CreateEnvelope;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest,
+            cts.Token);
+
+        return _responseParser.ParseEnvelope(content, url);
+    }
+
+    /// <summary>
+    ///     Creates a signing envelope from previously created source documents.
+    /// </summary>
+    /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Created envelope metadata response.</returns>
+    public async Task<PdfGateEnvelope> CreateEnvelopeAsync(
+        CreateEnvelopeRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.CreateEnvelope;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
+            cts.Token).ConfigureAwait(false);
+
+        return _responseParser.ParseEnvelope(content, url);
+    }
+
 
     /// <summary>
     ///     Flatten an interactive PDF into a static, non-editable PDF.

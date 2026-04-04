@@ -52,7 +52,8 @@ public sealed class PdfGateRequestTimeoutsTests
     [Fact]
     public async Task AllPublicCancellationTokenOverloads_UseWrappedToken()
     {
-        var handler = new RecordingHttpMessageHandler();
+        var handler = new TestHttpMessageHandler((request, _) =>
+            CreateResponse(request));
         using var client = new PdfGateClient("live_test_key", handler,
             new PdfGateRequestTimeouts());
 
@@ -63,6 +64,52 @@ public sealed class PdfGateRequestTimeoutsTests
         _ = await client.GeneratePdfAsync(
             new GeneratePdfRequest { Html = "<p>x</p>" },
             CancellationToken.None);
+        Assert.True(handler.LastCancellationToken.CanBeCanceled);
+
+        _ = client.CreateEnvelope(
+            new CreateEnvelopeRequest
+            {
+                RequesterName = "SDK Tests",
+                Documents =
+                [
+                    new EnvelopeDocument
+                    {
+                        SourceDocumentId = "doc-id",
+                        Name = "Agreement",
+                        Recipients =
+                        [
+                            new EnvelopeRecipient
+                            {
+                                Email = "anna@example.com",
+                                Name = "Anna Smith"
+                            }
+                        ]
+                    }
+                ]
+            }, CancellationToken.None);
+        Assert.True(handler.LastCancellationToken.CanBeCanceled);
+
+        _ = await client.CreateEnvelopeAsync(
+            new CreateEnvelopeRequest
+            {
+                RequesterName = "SDK Tests",
+                Documents =
+                [
+                    new EnvelopeDocument
+                    {
+                        SourceDocumentId = "doc-id",
+                        Name = "Agreement",
+                        Recipients =
+                        [
+                            new EnvelopeRecipient
+                            {
+                                Email = "anna@example.com",
+                                Name = "Anna Smith"
+                            }
+                        ]
+                    }
+                ]
+            }, CancellationToken.None);
         Assert.True(handler.LastCancellationToken.CanBeCanceled);
 
         _ = client.FlattenPdf(new FlattenPdfRequest { DocumentId = "doc-id" },
@@ -156,59 +203,33 @@ public sealed class PdfGateRequestTimeoutsTests
         };
     }
 
-    private sealed class RecordingHttpMessageHandler : HttpMessageHandler
+    private static HttpResponseMessage CreateResponse(
+        HttpRequestMessage request)
     {
-        private const string DocumentResponseBody =
+        const string documentResponseBody =
             "{\"id\":\"doc-id\",\"status\":\"completed\"}";
 
-        private const string ExtractResponseBody =
+        const string extractResponseBody =
             "{\"field\":\"value\"}";
 
-        private static readonly byte[] FileResponseBody =
+        byte[] fileResponseBody =
             Encoding.UTF8.GetBytes("file-bytes");
-
-        public CancellationToken LastCancellationToken
-        {
-            get;
-            private set;
-        }
-
-        protected override HttpResponseMessage Send(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
-        {
-            LastCancellationToken = cancellationToken;
-            return CreateResponse(request);
-        }
-
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
-        {
-            LastCancellationToken = cancellationToken;
-            return Task.FromResult(CreateResponse(request));
-        }
-
-        private static HttpResponseMessage CreateResponse(
-            HttpRequestMessage request)
-        {
-            var path = request.RequestUri?.AbsolutePath ?? string.Empty;
-            if (path.EndsWith("/forms/extract-data", StringComparison.Ordinal))
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(ExtractResponseBody)
-                };
-
-            if (path.Contains("/file/", StringComparison.Ordinal))
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new ByteArrayContent(FileResponseBody)
-                };
-
+        var path = request.RequestUri?.AbsolutePath ?? string.Empty;
+        if (path.EndsWith("/forms/extract-data", StringComparison.Ordinal))
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(DocumentResponseBody)
+                Content = new StringContent(extractResponseBody)
             };
-        }
+
+        if (path.Contains("/file/", StringComparison.Ordinal))
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(fileResponseBody)
+            };
+
+        return new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(documentResponseBody)
+        };
     }
 }

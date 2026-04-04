@@ -14,16 +14,32 @@ internal sealed class PdfGateResponseParser(JsonSerializerOptions jsonOptions)
     /// </summary>
     public PdfGateDocumentResponse Parse(string content, string url)
     {
+        return Parse<PdfGateDocumentResponse>(content, url, document =>
+            document.Status is not null);
+    }
+
+    /// <summary>
+    ///     Parse JSON responses into envelope metadata.
+    /// </summary>
+    public PdfGateEnvelope ParseEnvelope(string content, string url)
+    {
+        return Parse<PdfGateEnvelope>(content, url, envelope =>
+            envelope.Status is not null);
+    }
+
+    /// <summary>
+    ///     Parse JSON responses into typed models.
+    /// </summary>
+    public T Parse<T>(string content, string url, Func<T, bool>? isValid = null)
+    {
         try
         {
-            var document =
-                JsonSerializer.Deserialize<PdfGateDocumentResponse>(content,
-                    jsonOptions);
-            if (document is null || document.Status is null)
+            var response = JsonSerializer.Deserialize<T>(content, jsonOptions);
+            if (response is null || isValid is not null && !isValid(response))
                 throw new PdfGateException(
                     $"The API returned an invalid response for endpoint '{url}'.");
 
-            return document;
+            return response;
         }
         catch (PdfGateException)
         {

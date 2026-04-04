@@ -49,7 +49,8 @@ public sealed class
             PreSignedUrlExpiresIn = 3600,
             Metadata = new
             {
-                author = "acceptance-test", source = "compress"
+                author = "acceptance-test",
+                source = "compress"
             }
         };
 
@@ -99,7 +100,8 @@ public sealed class
             PreSignedUrlExpiresIn = 3600,
             Metadata = new
             {
-                author = "acceptance-test", source = "compress"
+                author = "acceptance-test",
+                source = "compress"
             }
         };
 

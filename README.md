@@ -186,6 +186,40 @@ PdfGateDocumentResponse compressedDoc = await client.CompressPdfAsync(
     CancellationToken.None);
 ```
 
+**Create an envelope**
+
+```csharp
+var createEnvelopeRequest = new CreateEnvelopeRequest
+{
+    RequesterName = "John Doe",
+    Documents =
+    [
+        new EnvelopeDocument
+        {
+            SourceDocumentId = uploadedResponse.Id,
+            Name = "Employment Agreement",
+            Recipients =
+            [
+                new EnvelopeRecipient
+                {
+                    Email = "anna@example.com",
+                    Name = "Anna Smith"
+                }
+            ]
+        }
+    ],
+    Metadata = new
+    {
+        customerId = "cus_123",
+        department = "sales"
+    }
+};
+
+PdfGateEnvelope envelope = await client.CreateEnvelopeAsync(
+    createEnvelopeRequest,
+    CancellationToken.None);
+```
+
 All of these operations will return a new Document ID that points to the document
 that resulted from this transformation. You can then download it with `GetFileAsync`:
 

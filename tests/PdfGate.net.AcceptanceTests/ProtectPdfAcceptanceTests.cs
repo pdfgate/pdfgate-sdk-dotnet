@@ -54,7 +54,8 @@ public sealed class
             PreSignedUrlExpiresIn = 3600,
             Metadata = new
             {
-                author = "acceptance-test", source = "protect-aes256"
+                author = "acceptance-test",
+                source = "protect-aes256"
             }
         };
 
@@ -102,7 +103,8 @@ public sealed class
             PreSignedUrlExpiresIn = 3600,
             Metadata = new
             {
-                author = "acceptance-test", source = "protect-aes256"
+                author = "acceptance-test",
+                source = "protect-aes256"
             }
         };
 
