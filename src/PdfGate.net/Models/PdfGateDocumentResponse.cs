@@ -20,6 +20,7 @@ public sealed record PdfGateDocumentResponse
     /// <summary>
     ///     Processing status.
     /// </summary>
+    [JsonConverter(typeof(NullableDocumentStatusJsonConverter))]
     public DocumentStatus? Status
     {
         get;
@@ -186,7 +187,8 @@ internal sealed class
             "signature_audit_log" => DocumentType.SignatureAuditLog,
             "document_fields_added" => DocumentType.DocumentFieldsAdded,
             "signing_template" => DocumentType.SigningTemplate,
-            _ => throw new JsonException($"Unknown document type: '{value}'.")
+            // Forward compatibility: unrecognized values are surfaced as null.
+            _ => (DocumentType?)null
         };
     }
 
@@ -217,4 +219,45 @@ internal sealed class
 
         writer.WriteStringValue(wireValue);
     }
+}
+
+internal sealed class DocumentStatusJsonConverter
+    : JsonConverter<DocumentStatus>
+{
+    public override DocumentStatus Read(ref Utf8JsonReader reader,
+        Type typeToConvert, JsonSerializerOptions options)
+    {
+        var value = reader.GetString();
+        return value switch
+        {
+            "completed" => DocumentStatus.Completed,
+            "processing" => DocumentStatus.Processing,
+            "expired" => DocumentStatus.Expired,
+            "failed" => DocumentStatus.Failed,
+            _ => throw new JsonException($"Unknown document status: '{value}'.")
+        };
+    }
+
+    public override void Write(Utf8JsonWriter writer, DocumentStatus value,
+        JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value switch
+        {
+            DocumentStatus.Completed => "completed",
+            DocumentStatus.Processing => "processing",
+            DocumentStatus.Expired => "expired",
+            DocumentStatus.Failed => "failed",
+            _ => throw new JsonException(
+                $"Unknown document status value: '{value}'.")
+        });
+    }
+}
+
+internal sealed class NullableDocumentStatusJsonConverter
+    : NullableStructJsonConverter<DocumentStatus>
+{
+    protected override JsonConverter<DocumentStatus> InnerConverter
+    {
+        get;
+    } = new DocumentStatusJsonConverter();
 }

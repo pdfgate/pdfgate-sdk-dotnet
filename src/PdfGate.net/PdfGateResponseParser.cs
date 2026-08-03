@@ -15,7 +15,7 @@ internal sealed class PdfGateResponseParser(JsonSerializerOptions jsonOptions)
     public PdfGateDocumentResponse Parse(string content, string url)
     {
         return Parse<PdfGateDocumentResponse>(content, url, document =>
-            document.Status is not null);
+            !string.IsNullOrEmpty(document.Id));
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ internal sealed class PdfGateResponseParser(JsonSerializerOptions jsonOptions)
     public PdfGateEnvelope ParseEnvelope(string content, string url)
     {
         return Parse<PdfGateEnvelope>(content, url, envelope =>
-            envelope.Status is not null);
+            !string.IsNullOrEmpty(envelope.Id));
     }
 
     /// <summary>

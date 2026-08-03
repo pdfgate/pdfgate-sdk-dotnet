@@ -472,7 +472,16 @@ internal abstract class NullableStructJsonConverter<T>
         if (reader.TokenType == JsonTokenType.Null)
             return null;
 
-        return InnerConverter.Read(ref reader, typeof(T), options);
+        try
+        {
+            return InnerConverter.Read(ref reader, typeof(T), options);
+        }
+        catch (JsonException)
+        {
+            // Forward compatibility: an unrecognized value from the API (e.g. a newly
+            // added enum member) is surfaced as null instead of failing the whole response.
+            return null;
+        }
     }
 
     public override void Write(Utf8JsonWriter writer, T? value,

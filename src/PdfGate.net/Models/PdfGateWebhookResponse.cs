@@ -171,9 +171,6 @@ internal sealed class NullableWebhookStatusJsonConverter
 internal sealed class WebhookEventTypeListJsonConverter
     : JsonConverter<IReadOnlyList<WebhookEventType>>
 {
-    private static readonly WebhookEventTypeJsonConverter ElementConverter =
-        new();
-
     public override IReadOnlyList<WebhookEventType> Read(
         ref Utf8JsonReader reader, Type typeToConvert,
         JsonSerializerOptions options)
@@ -187,8 +184,12 @@ internal sealed class WebhookEventTypeListJsonConverter
             if (reader.TokenType == JsonTokenType.EndArray)
                 return results;
 
-            results.Add(ElementConverter.Read(ref reader,
-                typeof(WebhookEventType), options));
+            // Forward compatibility: unrecognized event types (e.g. newly added ones)
+            // are skipped instead of failing the whole response.
+            WebhookEventType? parsed =
+                WebhookEventTypeJsonConverter.TryFromWire(reader.GetString());
+            if (parsed.HasValue)
+                results.Add(parsed.Value);
         }
 
         throw new JsonException("Unexpected end of JSON array.");
@@ -199,7 +200,7 @@ internal sealed class WebhookEventTypeListJsonConverter
     {
         writer.WriteStartArray();
         foreach (WebhookEventType item in value)
-            ElementConverter.Write(writer, item, options);
+            writer.WriteStringValue(WebhookEventTypeJsonConverter.ToWire(item));
 
         writer.WriteEndArray();
     }
@@ -208,10 +209,8 @@ internal sealed class WebhookEventTypeListJsonConverter
 internal sealed class WebhookEventTypeJsonConverter
     : JsonConverter<WebhookEventType>
 {
-    public override WebhookEventType Read(ref Utf8JsonReader reader,
-        Type typeToConvert, JsonSerializerOptions options)
+    public static WebhookEventType? TryFromWire(string? value)
     {
-        var value = reader.GetString();
         return value switch
         {
             "envelope.sent" => WebhookEventType.EnvelopeSent,
@@ -219,15 +218,13 @@ internal sealed class WebhookEventTypeJsonConverter
             "envelope.expired" => WebhookEventType.EnvelopeExpired,
             "envelope.document.completed" =>
                 WebhookEventType.EnvelopeDocumentCompleted,
-            _ => throw new JsonException(
-                $"Unknown webhook event type: '{value}'.")
+            _ => (WebhookEventType?)null
         };
     }
 
-    public override void Write(Utf8JsonWriter writer, WebhookEventType value,
-        JsonSerializerOptions options)
+    public static string ToWire(WebhookEventType value)
     {
-        writer.WriteStringValue(value switch
+        return value switch
         {
             WebhookEventType.EnvelopeSent => "envelope.sent",
             WebhookEventType.EnvelopeCompleted => "envelope.completed",
@@ -236,6 +233,22 @@ internal sealed class WebhookEventTypeJsonConverter
                 "envelope.document.completed",
             _ => throw new JsonException(
                 $"Unknown webhook event type value: '{value}'.")
-        });
+        };
+    }
+
+    public override WebhookEventType Read(ref Utf8JsonReader reader,
+        Type typeToConvert, JsonSerializerOptions options)
+    {
+        WebhookEventType? parsed = TryFromWire(reader.GetString());
+        if (parsed.HasValue)
+            return parsed.Value;
+
+        throw new JsonException("Unknown webhook event type.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, WebhookEventType value,
+        JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(ToWire(value));
     }
 }
