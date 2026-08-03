@@ -867,4 +867,272 @@ public sealed class PdfGateClient : IDisposable
 
         return _responseParser.Parse(response, url);
     }
+
+    /// <summary>
+    ///     Add interactive form fields to a PDF.
+    /// </summary>
+    /// <param name="request">Add form fields request payload. See <see cref="AddFormFieldsRequest" />.</param>
+    /// <returns>Resulting document metadata response.</returns>
+    public PdfGateDocumentResponse AddFormFields(
+        AddFormFieldsRequest request)
+    {
+        return AddFormFields(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Add interactive form fields to a PDF.
+    /// </summary>
+    /// <param name="request">Add form fields request payload. See <see cref="AddFormFieldsRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Resulting document metadata response.</returns>
+    public PdfGateDocumentResponse AddFormFields(
+        AddFormFieldsRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.FlattenPdf,
+            cancellationToken);
+        var url = ApiRoutes.AddFormFields;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest,
+            cts.Token);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Add interactive form fields to a PDF.
+    /// </summary>
+    /// <param name="request">Add form fields request payload. See <see cref="AddFormFieldsRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Resulting document metadata response.</returns>
+    public async Task<PdfGateDocumentResponse> AddFormFieldsAsync(
+        AddFormFieldsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts = CreateTimeoutTokenSource(
+            _requestTimeouts.FlattenPdf,
+            cancellationToken);
+        var url = ApiRoutes.AddFormFields;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
+            cts.Token).ConfigureAwait(false);
+
+        return _responseParser.Parse(content, url);
+    }
+
+    /// <summary>
+    ///     Permanently delete a stored document.
+    ///     A document referenced by a draft or in-progress envelope cannot be
+    ///     deleted until those envelopes are completed or expired.
+    /// </summary>
+    /// <param name="request">Delete document request payload. See <see cref="DeleteDocumentRequest" />.</param>
+    public void DeleteDocument(
+        DeleteDocumentRequest request)
+    {
+        DeleteDocument(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Permanently delete a stored document.
+    ///     A document referenced by a draft or in-progress envelope cannot be
+    ///     deleted until those envelopes are completed or expired.
+    /// </summary>
+    /// <param name="request">Delete document request payload. See <see cref="DeleteDocumentRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public void DeleteDocument(
+        DeleteDocumentRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.DeleteDocument(request.DocumentId);
+        _httpClient.Delete(url, cts.Token);
+    }
+
+    /// <summary>
+    ///     Permanently delete a stored document.
+    ///     A document referenced by a draft or in-progress envelope cannot be
+    ///     deleted until those envelopes are completed or expired.
+    /// </summary>
+    /// <param name="request">Delete document request payload. See <see cref="DeleteDocumentRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public async Task DeleteDocumentAsync(
+        DeleteDocumentRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.DeleteDocument(request.DocumentId);
+        await _httpClient.DeleteAsync(url, cts.Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Register a webhook endpoint to receive PDFGate event notifications.
+    ///     The response includes a secret (returned only once, at creation time)
+    ///     used to verify webhook payloads via <see cref="PdfGateWebhook.VerifySignature(string, string, string)" />.
+    /// </summary>
+    /// <param name="request">Create webhook request payload. See <see cref="CreateWebhookRequest" />.</param>
+    /// <returns>Created webhook metadata, including the signing secret.</returns>
+    public PdfGateWebhookResponse CreateWebhook(
+        CreateWebhookRequest request)
+    {
+        return CreateWebhook(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Register a webhook endpoint to receive PDFGate event notifications.
+    /// </summary>
+    /// <param name="request">Create webhook request payload. See <see cref="CreateWebhookRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Created webhook metadata, including the signing secret.</returns>
+    public PdfGateWebhookResponse CreateWebhook(
+        CreateWebhookRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.Webhook;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest, cts.Token);
+
+        return _responseParser.Parse<PdfGateWebhookResponse>(content, url);
+    }
+
+    /// <summary>
+    ///     Register a webhook endpoint to receive PDFGate event notifications.
+    /// </summary>
+    /// <param name="request">Create webhook request payload. See <see cref="CreateWebhookRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Created webhook metadata, including the signing secret.</returns>
+    public async Task<PdfGateWebhookResponse> CreateWebhookAsync(
+        CreateWebhookRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.Webhook;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
+            cts.Token).ConfigureAwait(false);
+
+        return _responseParser.Parse<PdfGateWebhookResponse>(content, url);
+    }
+
+    /// <summary>
+    ///     Retrieve a registered webhook by ID. The secret is not returned by
+    ///     this endpoint (only at creation time).
+    /// </summary>
+    /// <param name="request">Get webhook request payload. See <see cref="GetWebhookRequest" />.</param>
+    /// <returns>Webhook metadata.</returns>
+    public PdfGateWebhookResponse GetWebhook(
+        GetWebhookRequest request)
+    {
+        return GetWebhook(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Retrieve a registered webhook by ID.
+    /// </summary>
+    /// <param name="request">Get webhook request payload. See <see cref="GetWebhookRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Webhook metadata.</returns>
+    public PdfGateWebhookResponse GetWebhook(
+        GetWebhookRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetWebhook(request.Id);
+        var content = _httpClient.Get(url, cts.Token);
+
+        return _responseParser.Parse<PdfGateWebhookResponse>(content, url);
+    }
+
+    /// <summary>
+    ///     Retrieve a registered webhook by ID.
+    /// </summary>
+    /// <param name="request">Get webhook request payload. See <see cref="GetWebhookRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Webhook metadata.</returns>
+    public async Task<PdfGateWebhookResponse> GetWebhookAsync(
+        GetWebhookRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetWebhook(request.Id);
+        var content = await _httpClient.GetAsync(url, cts.Token)
+            .ConfigureAwait(false);
+
+        return _responseParser.Parse<PdfGateWebhookResponse>(content, url);
+    }
+
+    /// <summary>
+    ///     Delete a registered webhook.
+    /// </summary>
+    /// <param name="request">Delete webhook request payload. See <see cref="DeleteWebhookRequest" />.</param>
+    public void DeleteWebhook(
+        DeleteWebhookRequest request)
+    {
+        DeleteWebhook(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Delete a registered webhook.
+    /// </summary>
+    /// <param name="request">Delete webhook request payload. See <see cref="DeleteWebhookRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public void DeleteWebhook(
+        DeleteWebhookRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetWebhook(request.Id);
+        _httpClient.Delete(url, cts.Token);
+    }
+
+    /// <summary>
+    ///     Delete a registered webhook.
+    /// </summary>
+    /// <param name="request">Delete webhook request payload. See <see cref="DeleteWebhookRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public async Task DeleteWebhookAsync(
+        DeleteWebhookRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetWebhook(request.Id);
+        await _httpClient.DeleteAsync(url, cts.Token).ConfigureAwait(false);
+    }
 }

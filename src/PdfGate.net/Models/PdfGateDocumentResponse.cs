@@ -146,7 +146,22 @@ public enum DocumentType
     /// <summary>
     ///     Document uploaded by file or URL.
     /// </summary>
-    Uploaded
+    Uploaded,
+
+    /// <summary>
+    ///     Signature audit log document produced by a signing flow.
+    /// </summary>
+    SignatureAuditLog,
+
+    /// <summary>
+    ///     Document created by adding form fields.
+    /// </summary>
+    DocumentFieldsAdded,
+
+    /// <summary>
+    ///     Signing template document.
+    /// </summary>
+    SigningTemplate
 }
 
 internal sealed class
@@ -168,6 +183,9 @@ internal sealed class
             "compressed" => DocumentType.Compressed,
             "signed" => DocumentType.Signed,
             "uploaded" => DocumentType.Uploaded,
+            "signature_audit_log" => DocumentType.SignatureAuditLog,
+            "document_fields_added" => DocumentType.DocumentFieldsAdded,
+            "signing_template" => DocumentType.SigningTemplate,
             _ => throw new JsonException($"Unknown document type: '{value}'.")
         };
     }
@@ -190,6 +208,9 @@ internal sealed class
             DocumentType.Compressed => "compressed",
             DocumentType.Signed => "signed",
             DocumentType.Uploaded => "uploaded",
+            DocumentType.SignatureAuditLog => "signature_audit_log",
+            DocumentType.DocumentFieldsAdded => "document_fields_added",
+            DocumentType.SigningTemplate => "signing_template",
             _ => throw new JsonException(
                 $"Unknown document type value: '{value}'.")
         };

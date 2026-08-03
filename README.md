@@ -125,11 +125,46 @@ Once you have a Document ID, you can transform it with any of the following oper
 ```csharp
 var flattenRequest = new FlattenPdfRequest
 {
-    DocumentId = uploadedResponse.Id
+    DocumentId = uploadedResponse.Id,
+    // Optional: flatten only these fields and leave the rest interactive.
+    // Omit FieldNames to flatten the whole document.
+    FieldNames = ["signature", "date"]
 };
 
 PdfGateDocumentResponse flattenedDoc = await client.FlattenPdfAsync(
     flattenRequest,
+    CancellationToken.None);
+```
+
+**Add form fields**
+
+```csharp
+var addFieldsRequest = new AddFormFieldsRequest
+{
+    DocumentId = uploadedResponse.Id,
+    // Customize placeholder fields detected in the PDF, keyed by field name.
+    FieldOverrides = new Dictionary<string, FieldOverride>
+    {
+        ["signature"] = new() { Role = "signer", Optional = false }
+    },
+    // Or place fields at explicit positions on a given page.
+    Fields =
+    [
+        new ManualFormField
+        {
+            Name = "signed_on",
+            Type = DocumentFieldType.Date,
+            Page = 1,
+            X = 100,
+            Y = 650,
+            Width = 160,
+            Height = 24
+        }
+    ]
+};
+
+PdfGateDocumentResponse withFields = await client.AddFormFieldsAsync(
+    addFieldsRequest,
     CancellationToken.None);
 ```
 
@@ -195,6 +230,17 @@ var getFileRequest = new GetFileRequest { DocumentId = transformedDoc.Id };
 
 Stream fileResponse = await client.GetFileAsync(getFileRequest, CancellationToken.None);
 ```
+
+**Delete a document**
+
+```csharp
+await client.DeleteDocumentAsync(
+    new DeleteDocumentRequest { DocumentId = uploadedResponse.Id },
+    CancellationToken.None);
+```
+
+A document referenced by a draft or in-progress envelope cannot be deleted until those
+envelopes are completed or expired.
 
 ### Digital Signatures
 
@@ -311,6 +357,40 @@ PdfGateDocumentResponse documentWithRefreshedUrl = await client.GetDocumentAsync
 ```
 
 ### Webhooks
+
+Register, retrieve, and delete webhook endpoints that receive PDFGate event
+notifications. The `Secret` returned by `CreateWebhookAsync` is shown only once —
+store it to verify incoming payloads.
+
+```csharp
+PdfGateWebhookResponse webhook = await client.CreateWebhookAsync(
+    new CreateWebhookRequest
+    {
+        Url = "https://example.com/pdfgate-callback",
+        EventTypes =
+        [
+            WebhookEventType.EnvelopeCompleted,
+            WebhookEventType.EnvelopeSent
+        ],
+        Description = "Production signing events"
+    },
+    CancellationToken.None);
+
+string webhookId = webhook.Id;
+string? secret = webhook.Secret;
+
+PdfGateWebhookResponse fetched = await client.GetWebhookAsync(
+    new GetWebhookRequest { Id = webhookId },
+    CancellationToken.None);
+
+await client.DeleteWebhookAsync(
+    new DeleteWebhookRequest { Id = webhookId },
+    CancellationToken.None);
+```
+
+The subscribable events are exposed via `WebhookEventType`: `EnvelopeSent`,
+`EnvelopeCompleted`, `EnvelopeExpired`, and `EnvelopeDocumentCompleted`. The webhook
+URL must be publicly accessible (localhost is not supported).
 
 Use `PdfGateWebhook.VerifySignature` to validate the
 `x-pdfgate-signature` header against the raw request body before

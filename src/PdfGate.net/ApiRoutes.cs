@@ -7,11 +7,13 @@ internal static class ApiRoutes
     internal const string GeneratePdf = "v1/generate/pdf";
     internal const string CreateEnvelope = "envelope";
     internal const string FlattenPdf = "forms/flatten";
+    internal const string AddFormFields = "forms/fields";
     internal const string ExtractPdfFormData = "forms/extract-data";
     internal const string WatermarkPdf = "watermark/pdf";
     internal const string ProtectPdf = "protect/pdf";
     internal const string CompressPdf = "compress/pdf";
     internal const string UploadFile = "upload";
+    internal const string Webhook = "webhook";
 
     internal static string GetDocument(string documentId,
         long? preSignedUrlExpiresIn = null)
@@ -37,5 +39,15 @@ internal static class ApiRoutes
     internal static string GetEnvelope(string envelopeId)
     {
         return $"envelope/{Uri.EscapeDataString(envelopeId)}";
+    }
+
+    internal static string DeleteDocument(string documentId)
+    {
+        return $"document/{Uri.EscapeDataString(documentId)}";
+    }
+
+    internal static string GetWebhook(string webhookId)
+    {
+        return $"webhook/{Uri.EscapeDataString(webhookId)}";
     }
 }

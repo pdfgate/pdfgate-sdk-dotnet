@@ -173,6 +173,35 @@ internal sealed class PdfGateHttpClient : IDisposable
             .ConfigureAwait(false);
     }
 
+    public async Task<string> DeleteAsync(string url,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(url);
+
+        return await TrySendRequest(
+                async () => await _httpClient
+                    .DeleteAsync(url, cancellationToken)
+                    .ConfigureAwait(false), url, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public string Delete(string url,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(url);
+
+        return TrySendRequest(
+            () =>
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Delete,
+                    url);
+                return _httpClient.SendAsync(request, cancellationToken)
+                    .GetAwaiter()
+                    .GetResult();
+            },
+            url, cancellationToken);
+    }
+
     public string Get(string url,
         CancellationToken cancellationToken = default)
     {
