@@ -97,4 +97,22 @@ public sealed record EnvelopeRecipient
         get;
         init;
     }
+
+    /// <summary>
+    ///     Number of days between signing reminders.
+    /// </summary>
+    public int? ReminderIntervalDays
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Maximum number of reminder attempts.
+    /// </summary>
+    public int? ReminderAttempts
+    {
+        get;
+        init;
+    }
 }

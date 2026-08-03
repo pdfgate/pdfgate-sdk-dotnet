@@ -15,6 +15,17 @@ public sealed record FlattenPdfRequest
     }
 
     /// <summary>
+    ///     Names of the form fields to flatten. When provided, only these fields are flattened
+    ///     and the rest of the form stays interactive. When omitted, the whole document is
+    ///     flattened.
+    /// </summary>
+    public IReadOnlyList<string>? FieldNames
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Always requests JSON metadata responses from the API.
     /// </summary>
     public bool JsonResponse

@@ -175,6 +175,24 @@ public sealed record EnvelopeRecipientResponse
         get;
         init;
     } = [];
+
+    /// <summary>
+    ///     Link the recipient uses to sign. Present while the recipient still needs to sign.
+    /// </summary>
+    public string? SigningLink
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Link to preview the signed document. Present once the recipient has signed.
+    /// </summary>
+    public string? PreviewLink
+    {
+        get;
+        init;
+    }
 }
 
 /// <summary>
@@ -218,6 +236,44 @@ public sealed record EnvelopeFieldResponse
         get;
         init;
     }
+
+    /// <summary>
+    ///     IANA timezone of the stored value. For datetime fields the value is normalized to
+    ///     UTC, so this is "UTC" once a value is captured.
+    /// </summary>
+    public string? Timezone
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Where the value originated: "server" for auto-filled fields or "user" for values
+    ///     submitted by the recipient.
+    /// </summary>
+    public string? Source
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Original value as submitted by the recipient, before UTC normalization (datetime fields).
+    /// </summary>
+    public string? UserValue
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     IANA timezone the recipient submitted the value in (datetime fields).
+    /// </summary>
+    public string? UserTimezone
+    {
+        get;
+        init;
+    }
 }
 
 /// <summary>
@@ -226,6 +282,11 @@ public sealed record EnvelopeFieldResponse
 [JsonConverter(typeof(EnvelopeStatusJsonConverter))]
 public enum EnvelopeStatus
 {
+    /// <summary>
+    ///     The envelope is a draft and has not been created yet.
+    /// </summary>
+    Draft,
+
     /// <summary>
     ///     The envelope has been created.
     /// </summary>
@@ -259,6 +320,11 @@ public enum EnvelopeDocumentStatus
     Pending,
 
     /// <summary>
+    ///     The document has expired.
+    /// </summary>
+    Expired,
+
+    /// <summary>
     ///     The document has been sent for signing.
     /// </summary>
     SentForSigning,
@@ -289,6 +355,11 @@ public enum DocumentRecipientStatus
     ///     The recipient has not signed yet.
     /// </summary>
     Pending,
+
+    /// <summary>
+    ///     The recipient has expired.
+    /// </summary>
+    Expired,
 
     /// <summary>
     ///     The recipient has signed.
@@ -362,6 +433,7 @@ internal sealed class EnvelopeStatusJsonConverter
         var value = reader.GetString();
         return value switch
         {
+            "draft" => EnvelopeStatus.Draft,
             "created" => EnvelopeStatus.Created,
             "in_progress" => EnvelopeStatus.InProgress,
             "completed" => EnvelopeStatus.Completed,
@@ -375,6 +447,7 @@ internal sealed class EnvelopeStatusJsonConverter
     {
         writer.WriteStringValue(value switch
         {
+            EnvelopeStatus.Draft => "draft",
             EnvelopeStatus.Created => "created",
             EnvelopeStatus.InProgress => "in_progress",
             EnvelopeStatus.Completed => "completed",
@@ -434,6 +507,7 @@ internal sealed class EnvelopeDocumentStatusJsonConverter
         return value switch
         {
             "pending" => EnvelopeDocumentStatus.Pending,
+            "expired" => EnvelopeDocumentStatus.Expired,
             "sent_for_signing" => EnvelopeDocumentStatus.SentForSigning,
             "signing_in_progress" => EnvelopeDocumentStatus.SigningInProgress,
             "signing_failed" => EnvelopeDocumentStatus.SigningFailed,
@@ -449,6 +523,7 @@ internal sealed class EnvelopeDocumentStatusJsonConverter
         writer.WriteStringValue(value switch
         {
             EnvelopeDocumentStatus.Pending => "pending",
+            EnvelopeDocumentStatus.Expired => "expired",
             EnvelopeDocumentStatus.SentForSigning => "sent_for_signing",
             EnvelopeDocumentStatus.SigningInProgress => "signing_in_progress",
             EnvelopeDocumentStatus.SigningFailed => "signing_failed",
@@ -478,6 +553,7 @@ internal sealed class DocumentRecipientStatusJsonConverter
         return value switch
         {
             "pending" => DocumentRecipientStatus.Pending,
+            "expired" => DocumentRecipientStatus.Expired,
             "signed" => DocumentRecipientStatus.Signed,
             _ => throw new JsonException(
                 $"Unknown document recipient status: '{value}'.")
@@ -490,6 +566,7 @@ internal sealed class DocumentRecipientStatusJsonConverter
         writer.WriteStringValue(value switch
         {
             DocumentRecipientStatus.Pending => "pending",
+            DocumentRecipientStatus.Expired => "expired",
             DocumentRecipientStatus.Signed => "signed",
             _ => throw new JsonException(
                 $"Unknown document recipient status value: '{value}'.")
