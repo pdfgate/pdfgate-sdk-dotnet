@@ -46,6 +46,15 @@ public sealed record PdfGateEnvelope
     }
 
     /// <summary>
+    ///     When the envelope will expire if it is not completed.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Envelope completion timestamp.
     /// </summary>
     public DateTimeOffset? CompletedAt
@@ -58,6 +67,24 @@ public sealed record PdfGateEnvelope
     ///     Envelope expiration timestamp.
     /// </summary>
     public DateTimeOffset? ExpiredAt
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     When the envelope was voided, if applicable.
+    /// </summary>
+    public DateTimeOffset? VoidedAt
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Reason provided when the envelope was voided, if any.
+    /// </summary>
+    public string? VoidReason
     {
         get;
         init;
@@ -305,7 +332,12 @@ public enum EnvelopeStatus
     /// <summary>
     ///     The envelope has expired.
     /// </summary>
-    Expired
+    Expired,
+
+    /// <summary>
+    ///     The envelope was voided (cancelled) by the sender.
+    /// </summary>
+    Voided
 }
 
 /// <summary>
@@ -323,6 +355,11 @@ public enum EnvelopeDocumentStatus
     ///     The document has expired.
     /// </summary>
     Expired,
+
+    /// <summary>
+    ///     The document was voided before all recipients signed.
+    /// </summary>
+    Voided,
 
     /// <summary>
     ///     The document has been sent for signing.
@@ -360,6 +397,11 @@ public enum DocumentRecipientStatus
     ///     The recipient has expired.
     /// </summary>
     Expired,
+
+    /// <summary>
+    ///     The recipient was voided before signing.
+    /// </summary>
+    Voided,
 
     /// <summary>
     ///     The recipient has signed.
@@ -438,6 +480,7 @@ internal sealed class EnvelopeStatusJsonConverter
             "in_progress" => EnvelopeStatus.InProgress,
             "completed" => EnvelopeStatus.Completed,
             "expired" => EnvelopeStatus.Expired,
+            "voided" => EnvelopeStatus.Voided,
             _ => throw new JsonException($"Unknown envelope status: '{value}'.")
         };
     }
@@ -452,6 +495,7 @@ internal sealed class EnvelopeStatusJsonConverter
             EnvelopeStatus.InProgress => "in_progress",
             EnvelopeStatus.Completed => "completed",
             EnvelopeStatus.Expired => "expired",
+            EnvelopeStatus.Voided => "voided",
             _ => throw new JsonException(
                 $"Unknown envelope status value: '{value}'.")
         });
@@ -517,6 +561,7 @@ internal sealed class EnvelopeDocumentStatusJsonConverter
         {
             "pending" => EnvelopeDocumentStatus.Pending,
             "expired" => EnvelopeDocumentStatus.Expired,
+            "voided" => EnvelopeDocumentStatus.Voided,
             "sent_for_signing" => EnvelopeDocumentStatus.SentForSigning,
             "signing_in_progress" => EnvelopeDocumentStatus.SigningInProgress,
             "signing_failed" => EnvelopeDocumentStatus.SigningFailed,
@@ -533,6 +578,7 @@ internal sealed class EnvelopeDocumentStatusJsonConverter
         {
             EnvelopeDocumentStatus.Pending => "pending",
             EnvelopeDocumentStatus.Expired => "expired",
+            EnvelopeDocumentStatus.Voided => "voided",
             EnvelopeDocumentStatus.SentForSigning => "sent_for_signing",
             EnvelopeDocumentStatus.SigningInProgress => "signing_in_progress",
             EnvelopeDocumentStatus.SigningFailed => "signing_failed",
@@ -563,6 +609,7 @@ internal sealed class DocumentRecipientStatusJsonConverter
         {
             "pending" => DocumentRecipientStatus.Pending,
             "expired" => DocumentRecipientStatus.Expired,
+            "voided" => DocumentRecipientStatus.Voided,
             "signed" => DocumentRecipientStatus.Signed,
             _ => throw new JsonException(
                 $"Unknown document recipient status: '{value}'.")
@@ -576,6 +623,7 @@ internal sealed class DocumentRecipientStatusJsonConverter
         {
             DocumentRecipientStatus.Pending => "pending",
             DocumentRecipientStatus.Expired => "expired",
+            DocumentRecipientStatus.Voided => "voided",
             DocumentRecipientStatus.Signed => "signed",
             _ => throw new JsonException(
                 $"Unknown document recipient status value: '{value}'.")

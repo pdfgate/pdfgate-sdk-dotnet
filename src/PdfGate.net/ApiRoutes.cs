@@ -41,6 +41,16 @@ internal static class ApiRoutes
         return $"envelope/{Uri.EscapeDataString(envelopeId)}";
     }
 
+    internal static string VoidEnvelope(string envelopeId)
+    {
+        return $"envelope/{Uri.EscapeDataString(envelopeId)}/void";
+    }
+
+    internal static string DeleteEnvelope(string envelopeId)
+    {
+        return $"envelope/{Uri.EscapeDataString(envelopeId)}";
+    }
+
     internal static string DeleteDocument(string documentId)
     {
         return $"document/{Uri.EscapeDataString(documentId)}";

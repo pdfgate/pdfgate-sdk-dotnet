@@ -122,6 +122,21 @@ public enum WebhookEventType
     EnvelopeExpired,
 
     /// <summary>
+    ///     An envelope was voided (cancelled) by the sender.
+    /// </summary>
+    EnvelopeVoided,
+
+    /// <summary>
+    ///     An envelope was permanently deleted by the sender.
+    /// </summary>
+    EnvelopeDeleted,
+
+    /// <summary>
+    ///     A recipient signed a document within an envelope.
+    /// </summary>
+    EnvelopeRecipientSigned,
+
+    /// <summary>
     ///     A document within an envelope was completed.
     /// </summary>
     EnvelopeDocumentCompleted
@@ -216,6 +231,10 @@ internal sealed class WebhookEventTypeJsonConverter
             "envelope.sent" => WebhookEventType.EnvelopeSent,
             "envelope.completed" => WebhookEventType.EnvelopeCompleted,
             "envelope.expired" => WebhookEventType.EnvelopeExpired,
+            "envelope.voided" => WebhookEventType.EnvelopeVoided,
+            "envelope.deleted" => WebhookEventType.EnvelopeDeleted,
+            "envelope.recipient.signed" =>
+                WebhookEventType.EnvelopeRecipientSigned,
             "envelope.document.completed" =>
                 WebhookEventType.EnvelopeDocumentCompleted,
             _ => (WebhookEventType?)null
@@ -229,6 +248,10 @@ internal sealed class WebhookEventTypeJsonConverter
             WebhookEventType.EnvelopeSent => "envelope.sent",
             WebhookEventType.EnvelopeCompleted => "envelope.completed",
             WebhookEventType.EnvelopeExpired => "envelope.expired",
+            WebhookEventType.EnvelopeVoided => "envelope.voided",
+            WebhookEventType.EnvelopeDeleted => "envelope.deleted",
+            WebhookEventType.EnvelopeRecipientSigned =>
+                "envelope.recipient.signed",
             WebhookEventType.EnvelopeDocumentCompleted =>
                 "envelope.document.completed",
             _ => throw new JsonException(
