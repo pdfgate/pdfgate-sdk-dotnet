@@ -926,6 +926,142 @@ public sealed class PdfGateClient : IDisposable
     }
 
     /// <summary>
+    ///     Voids (cancels) an envelope in created or in_progress status.
+    ///     Recipients who have not signed yet are notified by email and their
+    ///     signing links stop working; documents already signed by all
+    ///     recipients are not affected. The optional reason is visible to
+    ///     recipients. This action cannot be undone.
+    /// </summary>
+    /// <param name="request">Void envelope request payload. See <see cref="VoidEnvelopeRequest" />.</param>
+    /// <returns>Updated envelope metadata response.</returns>
+    public PdfGateEnvelope VoidEnvelope(
+        VoidEnvelopeRequest request)
+    {
+        return VoidEnvelope(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Voids (cancels) an envelope in created or in_progress status.
+    ///     Recipients who have not signed yet are notified by email and their
+    ///     signing links stop working; documents already signed by all
+    ///     recipients are not affected. The optional reason is visible to
+    ///     recipients. This action cannot be undone.
+    /// </summary>
+    /// <param name="request">Void envelope request payload. See <see cref="VoidEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Updated envelope metadata response.</returns>
+    public PdfGateEnvelope VoidEnvelope(
+        VoidEnvelopeRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.VoidEnvelope(request.Id);
+        var content = _httpClient.PostAsJson(url, BuildVoidEnvelopeBody(request),
+            cts.Token);
+
+        return _responseParser.ParseEnvelope(content, url);
+    }
+
+    /// <summary>
+    ///     Voids (cancels) an envelope in created or in_progress status.
+    ///     Recipients who have not signed yet are notified by email and their
+    ///     signing links stop working; documents already signed by all
+    ///     recipients are not affected. The optional reason is visible to
+    ///     recipients. This action cannot be undone.
+    /// </summary>
+    /// <param name="request">Void envelope request payload. See <see cref="VoidEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Updated envelope metadata response.</returns>
+    public async Task<PdfGateEnvelope> VoidEnvelopeAsync(
+        VoidEnvelopeRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.VoidEnvelope(request.Id);
+        var content = await _httpClient.PostAsJsonAsync(url,
+            BuildVoidEnvelopeBody(request), cts.Token).ConfigureAwait(false);
+
+        return _responseParser.ParseEnvelope(content, url);
+    }
+
+    private static string BuildVoidEnvelopeBody(VoidEnvelopeRequest request)
+    {
+        return request.Reason is null
+            ? "{}"
+            : JsonSerializer.Serialize(new { reason = request.Reason },
+                JsonOptions);
+    }
+
+    /// <summary>
+    ///     Permanently deletes an envelope and the files it produced.
+    ///     The signed documents and audit logs are removed from storage,
+    ///     recipient data is anonymized, and recipients lose access. Source
+    ///     documents are not deleted. Only envelopes in draft, completed,
+    ///     expired, or voided status can be deleted — void an active envelope
+    ///     first. This action cannot be undone.
+    /// </summary>
+    /// <param name="request">Delete envelope request payload. See <see cref="DeleteEnvelopeRequest" />.</param>
+    public void DeleteEnvelope(
+        DeleteEnvelopeRequest request)
+    {
+        DeleteEnvelope(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Permanently deletes an envelope and the files it produced.
+    ///     The signed documents and audit logs are removed from storage,
+    ///     recipient data is anonymized, and recipients lose access. Source
+    ///     documents are not deleted. Only envelopes in draft, completed,
+    ///     expired, or voided status can be deleted — void an active envelope
+    ///     first. This action cannot be undone.
+    /// </summary>
+    /// <param name="request">Delete envelope request payload. See <see cref="DeleteEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public void DeleteEnvelope(
+        DeleteEnvelopeRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.DeleteEnvelope(request.Id);
+        _httpClient.Delete(url, cts.Token);
+    }
+
+    /// <summary>
+    ///     Permanently deletes an envelope and the files it produced.
+    ///     The signed documents and audit logs are removed from storage,
+    ///     recipient data is anonymized, and recipients lose access. Source
+    ///     documents are not deleted. Only envelopes in draft, completed,
+    ///     expired, or voided status can be deleted — void an active envelope
+    ///     first. This action cannot be undone.
+    /// </summary>
+    /// <param name="request">Delete envelope request payload. See <see cref="DeleteEnvelopeRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public async Task DeleteEnvelopeAsync(
+        DeleteEnvelopeRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.DeleteEnvelope(request.Id);
+        await _httpClient.DeleteAsync(url, cts.Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
     ///     Permanently delete a stored document.
     ///     A document referenced by a draft or in-progress envelope cannot be
     ///     deleted until those envelopes are completed or expired.

@@ -305,6 +305,32 @@ PdfGateEnvelope envelopeState = await client.GetEnvelopeAsync(
     getEnvelopeRequest,
     CancellationToken.None);
 ```
+
+**Void an envelope**
+
+Cancel an envelope in `created` or `in_progress` status. Recipients who have not signed are notified by email and their signing links stop working; documents already signed by all recipients are not affected. The optional reason is visible to recipients.
+
+```csharp
+var voidEnvelopeRequest = new VoidEnvelopeRequest
+{
+    Id = envelope.Id,
+    Reason = "Contract terms changed" // optional, visible to recipients
+};
+
+PdfGateEnvelope voidedEnvelope = await client.VoidEnvelopeAsync(
+    voidEnvelopeRequest,
+    CancellationToken.None);
+```
+
+**Delete an envelope**
+
+Permanently delete an envelope and the files it produced (signed documents and audit logs). Recipient data is anonymized and recipients lose access; source documents are not deleted. Only envelopes in `draft`, `completed`, `expired`, or `voided` status can be deleted — void an active envelope first.
+
+```csharp
+await client.DeleteEnvelopeAsync(
+    new DeleteEnvelopeRequest { Id = envelope.Id },
+    CancellationToken.None);
+```
  
 ### PDF Data Extraction
 

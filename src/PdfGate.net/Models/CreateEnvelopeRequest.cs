@@ -31,6 +31,17 @@ public sealed record CreateEnvelopeRequest
         get;
         init;
     }
+
+    /// <summary>
+    ///     Days until the envelope and its signing links expire, counted from
+    ///     creation (min 1, max 90). Defaults to the account's envelope
+    ///     expiration setting.
+    /// </summary>
+    public int? ExpiresInDays
+    {
+        get;
+        init;
+    }
 }
 
 /// <summary>
