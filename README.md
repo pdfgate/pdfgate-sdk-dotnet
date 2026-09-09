@@ -248,6 +248,8 @@ Use envelopes to manage recipient signing flows for documents with form fields.
 
 **Create an envelope**
 
+Each recipient is given either as an email and name, or as the `RecipientId` of a stored recipient (see [Managing recipients](#managing-recipients)) — never both.
+
 ```csharp
 var createEnvelopeRequest = new CreateEnvelopeRequest
 {
@@ -331,7 +333,117 @@ await client.DeleteEnvelopeAsync(
     new DeleteEnvelopeRequest { Id = envelope.Id },
     CancellationToken.None);
 ```
- 
+
+### Embedded Signing
+
+Embedded recipients sign inside your own application through an embed link instead of receiving emails from PDFGate. Mark a recipient as `Embedded` when creating the envelope:
+
+```csharp
+var createEnvelopeRequest = new CreateEnvelopeRequest
+{
+    RequesterName = "John Doe",
+    Documents =
+    [
+        new EnvelopeDocument
+        {
+            SourceDocumentId = uploadedResponse.Id,
+            Name = "Employment Agreement",
+            Recipients =
+            [
+                new EnvelopeRecipient
+                {
+                    Email = "anna@example.com",
+                    Name = "Anna Smith",
+                    Embedded = true
+                }
+            ]
+        }
+    ]
+};
+
+PdfGateEnvelope envelope = await client.CreateEnvelopeAsync(
+    createEnvelopeRequest,
+    CancellationToken.None);
+
+PdfGateEnvelope sentEnvelope = await client.SendEnvelopeAsync(
+    new SendEnvelopeRequest { Id = envelope.Id },
+    CancellationToken.None);
+```
+
+After sending, create an embed link when the signer is ready. The envelope must be in `in_progress` status and the link expires after 10 minutes, so create one link per signing session, right before loading it:
+
+```csharp
+PdfGateEmbedLink embedLink = await client.CreateEmbedLinkAsync(
+    new CreateEmbedLinkRequest
+    {
+        Id = sentEnvelope.Id,
+        DocumentId = sentEnvelope.Documents[0].SourceDocumentId,
+        RecipientId = sentEnvelope.Documents[0].Recipients[0].RecipientId!,
+        ReturnUrl = "https://example.com/signing-done"
+    },
+    CancellationToken.None);
+```
+
+Load `embedLink.Url` in an iframe in your application:
+
+```html
+<iframe src="https://sign.pdfgate.com/embed/..." width="100%" height="800"></iframe>
+```
+
+When the signing session ends, the iframe redirects to your `ReturnUrl` with `event` (`signing_complete`, `voided`, `expired` or `not_found`), `envelopeId`, `documentId` and `recipientId` appended as query parameters. Existing query parameters on the `ReturnUrl` are preserved.
+
+### Managing Recipients
+
+Store recipients once and reuse them across envelopes by referencing their `RecipientId`. Emails are not unique: every `CreateRecipientAsync` call creates a new recipient. The email is stored lowercased and cannot be changed after creation.
+
+```csharp
+PdfGateRecipient recipient = await client.CreateRecipientAsync(
+    new CreateRecipientRequest
+    {
+        Email = "anna@example.com",
+        Name = "Anna Smith", // optional
+        Metadata = new { employeeId = "emp_123" } // optional
+    },
+    CancellationToken.None);
+```
+
+Reference the stored recipient when creating an envelope instead of providing an email and name:
+
+```csharp
+new EnvelopeRecipient
+{
+    RecipientId = recipient.Id
+}
+```
+
+Look up stored recipients by email (case-insensitive, returned oldest first):
+
+```csharp
+PdfGateRecipientList recipients = await client.ListRecipientsAsync(
+    new ListRecipientsRequest { Email = "anna@example.com" },
+    CancellationToken.None);
+```
+
+Fetch a stored recipient by ID:
+
+```csharp
+PdfGateRecipient fetchedRecipient = await client.GetRecipientAsync(
+    new GetRecipientRequest { Id = recipient.Id },
+    CancellationToken.None);
+```
+
+Update a stored recipient's name and/or metadata. The email cannot be changed, and existing envelopes are not affected — they keep the recipient name they were created with:
+
+```csharp
+PdfGateRecipient updatedRecipient = await client.UpdateRecipientAsync(
+    new UpdateRecipientRequest
+    {
+        Id = recipient.Id,
+        Name = "Anna Smith-Jones"
+    },
+    CancellationToken.None);
+```
+
 ### PDF Data Extraction
 
 The `ExtractPdfFormData` method lets you read data from a fillable PDF.

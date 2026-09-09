@@ -167,6 +167,26 @@ public sealed record EnvelopeRecipientResponse
     } = string.Empty;
 
     /// <summary>
+    ///     Identifier of the stored recipient this recipient was created
+    ///     from, if any.
+    /// </summary>
+    public string? RecipientId
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Whether the recipient signs through embedded signing. Embedded
+    ///     recipients receive no emails and have no signing link.
+    /// </summary>
+    public bool Embedded
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Recipient status.
     /// </summary>
     [JsonConverter(typeof(NullableDocumentRecipientStatusJsonConverter))]

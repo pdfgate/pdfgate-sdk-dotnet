@@ -79,26 +79,52 @@ public sealed record EnvelopeDocument
 
 /// <summary>
 ///     Recipient included in a create envelope request.
+///     Provide either <see cref="Email" /> and <see cref="Name" /> for an
+///     inline recipient, or <see cref="RecipientId" /> to reuse a stored
+///     recipient — never both.
 /// </summary>
 public sealed record EnvelopeRecipient
 {
     /// <summary>
-    ///     Recipient email address.
+    ///     Recipient email address. Required unless
+    ///     <see cref="RecipientId" /> is provided.
     /// </summary>
-    public string Email
+    public string? Email
     {
         get;
         init;
-    } = string.Empty;
+    }
 
     /// <summary>
-    ///     Recipient display name.
+    ///     Recipient display name. Required unless
+    ///     <see cref="RecipientId" /> is provided.
     /// </summary>
-    public string Name
+    public string? Name
     {
         get;
         init;
-    } = string.Empty;
+    }
+
+    /// <summary>
+    ///     Identifier of a stored recipient to reuse. Mutually exclusive with
+    ///     <see cref="Email" /> and <see cref="Name" />.
+    /// </summary>
+    public string? RecipientId
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Whether the recipient signs embedded inside your own application.
+    ///     Embedded recipients receive no emails from PDFGate; get their
+    ///     signing links via the create embed link endpoint after sending.
+    /// </summary>
+    public bool? Embedded
+    {
+        get;
+        init;
+    }
 
     /// <summary>
     ///     Optional recipient role.

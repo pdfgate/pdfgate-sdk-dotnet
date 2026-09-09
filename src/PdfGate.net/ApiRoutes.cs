@@ -14,6 +14,7 @@ internal static class ApiRoutes
     internal const string CompressPdf = "compress/pdf";
     internal const string UploadFile = "upload";
     internal const string Webhook = "webhook";
+    internal const string CreateRecipient = "recipient";
 
     internal static string GetDocument(string documentId,
         long? preSignedUrlExpiresIn = null)
@@ -49,6 +50,21 @@ internal static class ApiRoutes
     internal static string DeleteEnvelope(string envelopeId)
     {
         return $"envelope/{Uri.EscapeDataString(envelopeId)}";
+    }
+
+    internal static string CreateEmbedLink(string envelopeId)
+    {
+        return $"envelope/{Uri.EscapeDataString(envelopeId)}/embed-link";
+    }
+
+    internal static string ListRecipients(string email)
+    {
+        return $"recipients?email={Uri.EscapeDataString(email)}";
+    }
+
+    internal static string GetRecipient(string recipientId)
+    {
+        return $"recipient/{Uri.EscapeDataString(recipientId)}";
     }
 
     internal static string DeleteDocument(string documentId)
