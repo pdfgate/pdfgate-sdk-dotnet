@@ -9,6 +9,9 @@ namespace PdfGate.net;
 /// </summary>
 internal sealed class PdfGateHttpClient : IDisposable
 {
+    // netstandard2.0 has no HttpMethod.Patch.
+    private static readonly HttpMethod PatchMethod = new("PATCH");
+
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _jsonOptions;
 
@@ -114,6 +117,47 @@ internal sealed class PdfGateHttpClient : IDisposable
         {
             using var requestMessage =
                 new HttpRequestMessage(HttpMethod.Post, url);
+            requestMessage.Content = content;
+            return _httpClient.SendAsync(requestMessage, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
+        }, url, cancellationToken);
+    }
+
+    public async Task<string> PatchAsJsonAsync(string url,
+        string request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        return await TrySendRequest(async () =>
+            {
+                using var content =
+                    new StringContent(request, Encoding.UTF8,
+                        "application/json");
+                using var requestMessage =
+                    new HttpRequestMessage(PatchMethod, url);
+                requestMessage.Content = content;
+                return await _httpClient
+                    .SendAsync(requestMessage, cancellationToken)
+                    .ConfigureAwait(false);
+            }, url, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public string PatchAsJson(string url,
+        string request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        return TrySendRequest(() =>
+        {
+            using var content =
+                new StringContent(request, Encoding.UTF8,
+                    "application/json");
+            using var requestMessage =
+                new HttpRequestMessage(PatchMethod, url);
             requestMessage.Content = content;
             return _httpClient.SendAsync(requestMessage, cancellationToken)
                 .GetAwaiter()

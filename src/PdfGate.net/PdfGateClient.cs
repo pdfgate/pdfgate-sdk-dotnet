@@ -182,6 +182,11 @@ public sealed class PdfGateClient : IDisposable
 
     /// <summary>
     ///     Creates a signing envelope from previously created source documents.
+    ///     Each recipient is given either as an email and name, or as the
+    ///     recipientId of a stored recipient. Embedded recipients receive no
+    ///     email and get their signing links via
+    ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
+    ///     sending.
     /// </summary>
     /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
     /// <returns>Created envelope metadata response.</returns>
@@ -193,6 +198,11 @@ public sealed class PdfGateClient : IDisposable
 
     /// <summary>
     ///     Creates a signing envelope from previously created source documents.
+    ///     Each recipient is given either as an email and name, or as the
+    ///     recipientId of a stored recipient. Embedded recipients receive no
+    ///     email and get their signing links via
+    ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
+    ///     sending.
     /// </summary>
     /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -216,6 +226,11 @@ public sealed class PdfGateClient : IDisposable
 
     /// <summary>
     ///     Creates a signing envelope from previously created source documents.
+    ///     Each recipient is given either as an email and name, or as the
+    ///     recipientId of a stored recipient. Embedded recipients receive no
+    ///     email and get their signing links via
+    ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
+    ///     sending.
     /// </summary>
     /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -238,7 +253,10 @@ public sealed class PdfGateClient : IDisposable
     }
 
     /// <summary>
-    ///     Sends a previously created envelope to all recipients.
+    ///     Sends a previously created envelope to all recipients. Embedded
+    ///     recipients receive no email and get their signing links via
+    ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
+    ///     sending.
     /// </summary>
     /// <param name="request">Send envelope request payload. See <see cref="SendEnvelopeRequest" />.</param>
     /// <returns>Updated envelope metadata response.</returns>
@@ -249,7 +267,10 @@ public sealed class PdfGateClient : IDisposable
     }
 
     /// <summary>
-    ///     Sends a previously created envelope to all recipients.
+    ///     Sends a previously created envelope to all recipients. Embedded
+    ///     recipients receive no email and get their signing links via
+    ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
+    ///     sending.
     /// </summary>
     /// <param name="request">Send envelope request payload. See <see cref="SendEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -271,7 +292,10 @@ public sealed class PdfGateClient : IDisposable
     }
 
     /// <summary>
-    ///     Sends a previously created envelope to all recipients.
+    ///     Sends a previously created envelope to all recipients. Embedded
+    ///     recipients receive no email and get their signing links via
+    ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
+    ///     sending.
     /// </summary>
     /// <param name="request">Send envelope request payload. See <see cref="SendEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -1062,6 +1086,95 @@ public sealed class PdfGateClient : IDisposable
     }
 
     /// <summary>
+    ///     Creates an embed link for an embedded recipient to sign inside
+    ///     your own application. The envelope must be in in_progress status.
+    ///     The link expires after 10 minutes, so create it when the signer is
+    ///     ready — one link per signing session. When the session ends the
+    ///     iframe redirects to the returnUrl with event (signing_complete,
+    ///     voided, expired or not_found), envelopeId, documentId and
+    ///     recipientId appended as query parameters, preserving the
+    ///     returnUrl's existing query parameters.
+    /// </summary>
+    /// <param name="request">Create embed link request payload. See <see cref="CreateEmbedLinkRequest" />.</param>
+    /// <returns>Embed link metadata response.</returns>
+    public PdfGateEmbedLink CreateEmbedLink(
+        CreateEmbedLinkRequest request)
+    {
+        return CreateEmbedLink(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Creates an embed link for an embedded recipient to sign inside
+    ///     your own application. The envelope must be in in_progress status.
+    ///     The link expires after 10 minutes, so create it when the signer is
+    ///     ready — one link per signing session. When the session ends the
+    ///     iframe redirects to the returnUrl with event (signing_complete,
+    ///     voided, expired or not_found), envelopeId, documentId and
+    ///     recipientId appended as query parameters, preserving the
+    ///     returnUrl's existing query parameters.
+    /// </summary>
+    /// <param name="request">Create embed link request payload. See <see cref="CreateEmbedLinkRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Embed link metadata response.</returns>
+    public PdfGateEmbedLink CreateEmbedLink(
+        CreateEmbedLinkRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.CreateEmbedLink(request.Id);
+        var content = _httpClient.PostAsJson(url,
+            BuildCreateEmbedLinkBody(request), cts.Token);
+
+        return _responseParser.Parse<PdfGateEmbedLink>(content, url,
+            embedLink => !string.IsNullOrEmpty(embedLink.Url));
+    }
+
+    /// <summary>
+    ///     Creates an embed link for an embedded recipient to sign inside
+    ///     your own application. The envelope must be in in_progress status.
+    ///     The link expires after 10 minutes, so create it when the signer is
+    ///     ready — one link per signing session. When the session ends the
+    ///     iframe redirects to the returnUrl with event (signing_complete,
+    ///     voided, expired or not_found), envelopeId, documentId and
+    ///     recipientId appended as query parameters, preserving the
+    ///     returnUrl's existing query parameters.
+    /// </summary>
+    /// <param name="request">Create embed link request payload. See <see cref="CreateEmbedLinkRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Embed link metadata response.</returns>
+    public async Task<PdfGateEmbedLink> CreateEmbedLinkAsync(
+        CreateEmbedLinkRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.CreateEmbedLink(request.Id);
+        var content = await _httpClient.PostAsJsonAsync(url,
+            BuildCreateEmbedLinkBody(request), cts.Token).ConfigureAwait(false);
+
+        return _responseParser.Parse<PdfGateEmbedLink>(content, url,
+            embedLink => !string.IsNullOrEmpty(embedLink.Url));
+    }
+
+    private static string BuildCreateEmbedLinkBody(
+        CreateEmbedLinkRequest request)
+    {
+        return JsonSerializer.Serialize(new
+        {
+            documentId = request.DocumentId,
+            recipientId = request.RecipientId,
+            returnUrl = request.ReturnUrl
+        }, JsonOptions);
+    }
+
+    /// <summary>
     ///     Permanently delete a stored document.
     ///     A document referenced by a draft or in-progress envelope cannot be
     ///     deleted until those envelopes are completed or expired.
@@ -1111,6 +1224,260 @@ public sealed class PdfGateClient : IDisposable
                 cancellationToken);
         var url = ApiRoutes.DeleteDocument(request.DocumentId);
         await _httpClient.DeleteAsync(url, cts.Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Creates a stored recipient that can be reused across envelopes via
+    ///     its recipientId. The email is stored lowercased and cannot be
+    ///     changed after creation. Emails are not unique: every call creates
+    ///     a new recipient.
+    /// </summary>
+    /// <param name="request">Create recipient request payload. See <see cref="CreateRecipientRequest" />.</param>
+    /// <returns>Created recipient metadata response.</returns>
+    public PdfGateRecipient CreateRecipient(
+        CreateRecipientRequest request)
+    {
+        return CreateRecipient(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Creates a stored recipient that can be reused across envelopes via
+    ///     its recipientId. The email is stored lowercased and cannot be
+    ///     changed after creation. Emails are not unique: every call creates
+    ///     a new recipient.
+    /// </summary>
+    /// <param name="request">Create recipient request payload. See <see cref="CreateRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Created recipient metadata response.</returns>
+    public PdfGateRecipient CreateRecipient(
+        CreateRecipientRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.CreateRecipient;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = _httpClient.PostAsJson(url, jsonRequest,
+            cts.Token);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Creates a stored recipient that can be reused across envelopes via
+    ///     its recipientId. The email is stored lowercased and cannot be
+    ///     changed after creation. Emails are not unique: every call creates
+    ///     a new recipient.
+    /// </summary>
+    /// <param name="request">Create recipient request payload. See <see cref="CreateRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Created recipient metadata response.</returns>
+    public async Task<PdfGateRecipient> CreateRecipientAsync(
+        CreateRecipientRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.CreateRecipient;
+        var jsonRequest = JsonSerializer.Serialize(request, JsonOptions);
+        var content = await _httpClient.PostAsJsonAsync(url, jsonRequest,
+            cts.Token).ConfigureAwait(false);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Lists stored recipients with the given email address, oldest
+    ///     first. The lookup is case-insensitive.
+    /// </summary>
+    /// <param name="request">List recipients request payload. See <see cref="ListRecipientsRequest" />.</param>
+    /// <returns>List of stored recipients matching the email.</returns>
+    public PdfGateRecipientList ListRecipients(
+        ListRecipientsRequest request)
+    {
+        return ListRecipients(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Lists stored recipients with the given email address, oldest
+    ///     first. The lookup is case-insensitive.
+    /// </summary>
+    /// <param name="request">List recipients request payload. See <see cref="ListRecipientsRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of stored recipients matching the email.</returns>
+    public PdfGateRecipientList ListRecipients(
+        ListRecipientsRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.ListRecipients(request.Email);
+        var content = _httpClient.Get(url, cts.Token);
+
+        return _responseParser.Parse<PdfGateRecipientList>(content, url);
+    }
+
+    /// <summary>
+    ///     Lists stored recipients with the given email address, oldest
+    ///     first. The lookup is case-insensitive.
+    /// </summary>
+    /// <param name="request">List recipients request payload. See <see cref="ListRecipientsRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>List of stored recipients matching the email.</returns>
+    public async Task<PdfGateRecipientList> ListRecipientsAsync(
+        ListRecipientsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.ListRecipients(request.Email);
+        var content = await _httpClient.GetAsync(url, cts.Token)
+            .ConfigureAwait(false);
+
+        return _responseParser.Parse<PdfGateRecipientList>(content, url);
+    }
+
+    /// <summary>
+    ///     Gets a stored recipient by its identifier.
+    /// </summary>
+    /// <param name="request">Get recipient request payload. See <see cref="GetRecipientRequest" />.</param>
+    /// <returns>Stored recipient metadata response.</returns>
+    public PdfGateRecipient GetRecipient(
+        GetRecipientRequest request)
+    {
+        return GetRecipient(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Gets a stored recipient by its identifier.
+    /// </summary>
+    /// <param name="request">Get recipient request payload. See <see cref="GetRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Stored recipient metadata response.</returns>
+    public PdfGateRecipient GetRecipient(
+        GetRecipientRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetRecipient(request.Id);
+        var content = _httpClient.Get(url, cts.Token);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Gets a stored recipient by its identifier.
+    /// </summary>
+    /// <param name="request">Get recipient request payload. See <see cref="GetRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Stored recipient metadata response.</returns>
+    public async Task<PdfGateRecipient> GetRecipientAsync(
+        GetRecipientRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetRecipient(request.Id);
+        var content = await _httpClient.GetAsync(url, cts.Token)
+            .ConfigureAwait(false);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Updates a stored recipient's name and/or metadata. The email
+    ///     address cannot be changed. Existing envelopes are not affected:
+    ///     they keep the recipient name they were created with.
+    /// </summary>
+    /// <param name="request">Update recipient request payload. See <see cref="UpdateRecipientRequest" />.</param>
+    /// <returns>Updated recipient metadata response.</returns>
+    public PdfGateRecipient UpdateRecipient(
+        UpdateRecipientRequest request)
+    {
+        return UpdateRecipient(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Updates a stored recipient's name and/or metadata. The email
+    ///     address cannot be changed. Existing envelopes are not affected:
+    ///     they keep the recipient name they were created with.
+    /// </summary>
+    /// <param name="request">Update recipient request payload. See <see cref="UpdateRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Updated recipient metadata response.</returns>
+    public PdfGateRecipient UpdateRecipient(
+        UpdateRecipientRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetRecipient(request.Id);
+        var content = _httpClient.PatchAsJson(url,
+            BuildUpdateRecipientBody(request), cts.Token);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Updates a stored recipient's name and/or metadata. The email
+    ///     address cannot be changed. Existing envelopes are not affected:
+    ///     they keep the recipient name they were created with.
+    /// </summary>
+    /// <param name="request">Update recipient request payload. See <see cref="UpdateRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Updated recipient metadata response.</returns>
+    public async Task<PdfGateRecipient> UpdateRecipientAsync(
+        UpdateRecipientRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.GetRecipient(request.Id);
+        var content = await _httpClient.PatchAsJsonAsync(url,
+            BuildUpdateRecipientBody(request), cts.Token).ConfigureAwait(false);
+
+        return ParseRecipient(content, url);
+    }
+
+    private static string BuildUpdateRecipientBody(
+        UpdateRecipientRequest request)
+    {
+        return JsonSerializer.Serialize(new
+        {
+            name = request.Name,
+            metadata = request.Metadata
+        }, JsonOptions);
+    }
+
+    private PdfGateRecipient ParseRecipient(string content, string url)
+    {
+        return _responseParser.Parse<PdfGateRecipient>(content, url,
+            recipient => !string.IsNullOrEmpty(recipient.Id));
     }
 
     /// <summary>
