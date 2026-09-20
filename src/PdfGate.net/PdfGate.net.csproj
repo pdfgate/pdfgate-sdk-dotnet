@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
 
     <PackageId>PdfGate.net</PackageId>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Authors>PDFGate</Authors>
     <Description>Official .NET SDK for the PDFGate HTTP API.</Description>
     <PackageTags>pdf;pdfgate;sdk</PackageTags>

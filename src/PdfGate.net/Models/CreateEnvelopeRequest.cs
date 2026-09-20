@@ -127,6 +127,19 @@ public sealed record EnvelopeRecipient
     }
 
     /// <summary>
+    ///     Signing order of the recipient, starting from 1. Recipients sign
+    ///     one after another in this order and a recipient is activated once
+    ///     everyone with a lower value has signed. Recipients with the same
+    ///     value can sign in parallel. Provide it for every recipient of a
+    ///     document or for none. Omitted, all recipients can sign immediately.
+    /// </summary>
+    public int? SigningOrder
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Optional recipient role.
     /// </summary>
     public string? Role

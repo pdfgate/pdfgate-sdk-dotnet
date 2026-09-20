@@ -132,6 +132,13 @@ public enum WebhookEventType
     EnvelopeDeleted,
 
     /// <summary>
+    ///     It became a recipient's turn to sign on a document with a signing
+    ///     order. Fires for every recipient, including those activated when
+    ///     the envelope is sent.
+    /// </summary>
+    EnvelopeRecipientActivated,
+
+    /// <summary>
     ///     A recipient signed a document within an envelope.
     /// </summary>
     EnvelopeRecipientSigned,
@@ -233,6 +240,8 @@ internal sealed class WebhookEventTypeJsonConverter
             "envelope.expired" => WebhookEventType.EnvelopeExpired,
             "envelope.voided" => WebhookEventType.EnvelopeVoided,
             "envelope.deleted" => WebhookEventType.EnvelopeDeleted,
+            "envelope.recipient.activated" =>
+                WebhookEventType.EnvelopeRecipientActivated,
             "envelope.recipient.signed" =>
                 WebhookEventType.EnvelopeRecipientSigned,
             "envelope.document.completed" =>
@@ -250,6 +259,8 @@ internal sealed class WebhookEventTypeJsonConverter
             WebhookEventType.EnvelopeExpired => "envelope.expired",
             WebhookEventType.EnvelopeVoided => "envelope.voided",
             WebhookEventType.EnvelopeDeleted => "envelope.deleted",
+            WebhookEventType.EnvelopeRecipientActivated =>
+                "envelope.recipient.activated",
             WebhookEventType.EnvelopeRecipientSigned =>
                 "envelope.recipient.signed",
             WebhookEventType.EnvelopeDocumentCompleted =>
