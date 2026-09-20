@@ -187,6 +187,19 @@ public sealed record EnvelopeRecipientResponse
     }
 
     /// <summary>
+    ///     Signing order of the recipient, starting from 1. Recipients sign
+    ///     one after another in this order and a recipient is activated once
+    ///     everyone with a lower value has signed. Recipients with the same
+    ///     value can sign in parallel. Null when the document has no signing
+    ///     order and all recipients can sign immediately.
+    /// </summary>
+    public int? SigningOrder
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Recipient status.
     /// </summary>
     [JsonConverter(typeof(NullableDocumentRecipientStatusJsonConverter))]
@@ -209,6 +222,16 @@ public sealed record EnvelopeRecipientResponse
     ///     Timestamp at which the recipient viewed the document.
     /// </summary>
     public DateTimeOffset? ViewedAt
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     The time it became the recipient's turn to sign. Null until the
+    ///     recipient is activated.
+    /// </summary>
+    public DateTimeOffset? ActivatedAt
     {
         get;
         init;

@@ -248,7 +248,7 @@ Use envelopes to manage recipient signing flows for documents with form fields.
 
 **Create an envelope**
 
-Each recipient is given either as an email and name, or as the `RecipientId` of a stored recipient (see [Managing recipients](#managing-recipients)) — never both.
+Each recipient is given either as an email and name, or as the `RecipientId` of a stored recipient (see [Managing recipients](#managing-recipients)) — never both. Optionally set `SigningOrder` (for every recipient of a document, or for none) to make recipients sign one after another: a recipient is emailed once everyone with a lower value has signed, and recipients with the same value can sign in parallel.
 
 ```csharp
 var createEnvelopeRequest = new CreateEnvelopeRequest
@@ -265,7 +265,14 @@ var createEnvelopeRequest = new CreateEnvelopeRequest
                 new EnvelopeRecipient
                 {
                     Email = "anna@example.com",
-                    Name = "Anna Smith"
+                    Name = "Anna Smith",
+                    SigningOrder = 1
+                },
+                new EnvelopeRecipient
+                {
+                    Email = "ben@example.com",
+                    Name = "Ben Jones",
+                    SigningOrder = 2
                 }
             ]
         }
@@ -370,7 +377,7 @@ PdfGateEnvelope sentEnvelope = await client.SendEnvelopeAsync(
     CancellationToken.None);
 ```
 
-After sending, create an embed link when the signer is ready. The envelope must be in `in_progress` status and the link expires after 10 minutes, so create one link per signing session, right before loading it:
+After sending, create an embed link when the signer is ready. The envelope must be in `in_progress` status and the link expires after 10 minutes, so create one link per signing session, right before loading it. On documents with a signing order the link can only be created once it is the recipient's turn — the `envelope.recipient.activated` webhook event signals that moment:
 
 ```csharp
 PdfGateEmbedLink embedLink = await client.CreateEmbedLinkAsync(
@@ -527,8 +534,10 @@ await client.DeleteWebhookAsync(
 ```
 
 The subscribable events are exposed via `WebhookEventType`: `EnvelopeSent`,
-`EnvelopeCompleted`, `EnvelopeExpired`, and `EnvelopeDocumentCompleted`. The webhook
-URL must be publicly accessible (localhost is not supported).
+`EnvelopeCompleted`, `EnvelopeExpired`, `EnvelopeRecipientActivated` (it became a
+recipient's turn to sign on a document with a signing order), and
+`EnvelopeDocumentCompleted`. The webhook URL must be publicly accessible
+(localhost is not supported).
 
 Use `PdfGateWebhook.VerifySignature` to validate the
 `x-pdfgate-signature` header against the raw request body before

@@ -256,7 +256,9 @@ public sealed class PdfGateClient : IDisposable
     ///     Sends a previously created envelope to all recipients. Embedded
     ///     recipients receive no email and get their signing links via
     ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
-    ///     sending.
+    ///     sending. On documents with a signingOrder only the first
+    ///     recipients are emailed; later recipients are activated as earlier
+    ///     ones sign.
     /// </summary>
     /// <param name="request">Send envelope request payload. See <see cref="SendEnvelopeRequest" />.</param>
     /// <returns>Updated envelope metadata response.</returns>
@@ -270,7 +272,9 @@ public sealed class PdfGateClient : IDisposable
     ///     Sends a previously created envelope to all recipients. Embedded
     ///     recipients receive no email and get their signing links via
     ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
-    ///     sending.
+    ///     sending. On documents with a signingOrder only the first
+    ///     recipients are emailed; later recipients are activated as earlier
+    ///     ones sign.
     /// </summary>
     /// <param name="request">Send envelope request payload. See <see cref="SendEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -295,7 +299,9 @@ public sealed class PdfGateClient : IDisposable
     ///     Sends a previously created envelope to all recipients. Embedded
     ///     recipients receive no email and get their signing links via
     ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
-    ///     sending.
+    ///     sending. On documents with a signingOrder only the first
+    ///     recipients are emailed; later recipients are activated as earlier
+    ///     ones sign.
     /// </summary>
     /// <param name="request">Send envelope request payload. See <see cref="SendEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -1093,7 +1099,10 @@ public sealed class PdfGateClient : IDisposable
     ///     iframe redirects to the returnUrl with event (signing_complete,
     ///     voided, expired or not_found), envelopeId, documentId and
     ///     recipientId appended as query parameters, preserving the
-    ///     returnUrl's existing query parameters.
+    ///     returnUrl's existing query parameters. On documents with a
+    ///     signingOrder the link can only be created once it is the
+    ///     recipient's turn (the API returns an error before that); the
+    ///     envelope.recipient.activated webhook signals that moment.
     /// </summary>
     /// <param name="request">Create embed link request payload. See <see cref="CreateEmbedLinkRequest" />.</param>
     /// <returns>Embed link metadata response.</returns>
@@ -1111,7 +1120,10 @@ public sealed class PdfGateClient : IDisposable
     ///     iframe redirects to the returnUrl with event (signing_complete,
     ///     voided, expired or not_found), envelopeId, documentId and
     ///     recipientId appended as query parameters, preserving the
-    ///     returnUrl's existing query parameters.
+    ///     returnUrl's existing query parameters. On documents with a
+    ///     signingOrder the link can only be created once it is the
+    ///     recipient's turn (the API returns an error before that); the
+    ///     envelope.recipient.activated webhook signals that moment.
     /// </summary>
     /// <param name="request">Create embed link request payload. See <see cref="CreateEmbedLinkRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -1141,7 +1153,10 @@ public sealed class PdfGateClient : IDisposable
     ///     iframe redirects to the returnUrl with event (signing_complete,
     ///     voided, expired or not_found), envelopeId, documentId and
     ///     recipientId appended as query parameters, preserving the
-    ///     returnUrl's existing query parameters.
+    ///     returnUrl's existing query parameters. On documents with a
+    ///     signingOrder the link can only be created once it is the
+    ///     recipient's turn (the API returns an error before that); the
+    ///     envelope.recipient.activated webhook signals that moment.
     /// </summary>
     /// <param name="request">Create embed link request payload. See <see cref="CreateEmbedLinkRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
