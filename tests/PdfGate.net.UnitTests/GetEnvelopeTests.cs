@@ -18,6 +18,8 @@ public sealed class GetEnvelopeTests
                                       "documents": [
                                         {
                                           "sourceDocumentId": "doc_123",
+                                          "signedDocumentId": "doc_signed",
+                                          "auditLogDocumentId": "doc_audit",
                                           "recipients": [
                                             {
                                               "email": "anna@example.com",
@@ -51,6 +53,8 @@ public sealed class GetEnvelopeTests
         Assert.Equal("/envelope/env_123", requestPath);
         Assert.Equal(EnvelopeStatus.InProgress, response.Status);
         Assert.Equal("env_123", response.Id);
+        Assert.Equal("doc_signed", response.Documents[0].SignedDocumentId);
+        Assert.Equal("doc_audit", response.Documents[0].AuditLogDocumentId);
     }
 
     [Fact]
