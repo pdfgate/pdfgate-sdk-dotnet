@@ -104,3 +104,50 @@ public sealed record UpdateRecipientRequest
         init;
     }
 }
+
+/// <summary>
+///     Request payload used to delete a stored recipient.
+/// </summary>
+public sealed record DeleteRecipientRequest
+{
+    /// <summary>
+    ///     Identifier of the recipient to delete.
+    /// </summary>
+    public required string Id
+    {
+        get;
+        init;
+    }
+}
+
+/// <summary>
+///     Request payload used to email a recipient the link to store a
+///     reusable signature (automatic signing).
+/// </summary>
+public sealed record RequestRecipientSignatureRequest
+{
+    /// <summary>
+    ///     Recipient identifier.
+    /// </summary>
+    public required string Id
+    {
+        get;
+        init;
+    }
+}
+
+/// <summary>
+///     Request payload used to remove a recipient's stored signature or
+///     cancel a pending enrolment (automatic signing).
+/// </summary>
+public sealed record RemoveRecipientSignatureRequest
+{
+    /// <summary>
+    ///     Recipient identifier.
+    /// </summary>
+    public required string Id
+    {
+        get;
+        init;
+    }
+}

@@ -200,6 +200,27 @@ public sealed record EnvelopeRecipientResponse
     }
 
     /// <summary>
+    ///     Whether the recipient is signed automatically with their stored
+    ///     signature when their turn to sign comes, with no signing session
+    ///     or email.
+    /// </summary>
+    public bool AutoSign
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Whether the recipient is emailed the signed document when the
+    ///     document completes.
+    /// </summary>
+    public bool SendSignedCopy
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Recipient status.
     /// </summary>
     [JsonConverter(typeof(NullableDocumentRecipientStatusJsonConverter))]
