@@ -124,6 +124,16 @@ public sealed record EnvelopeDocumentResponse
     }
 
     /// <summary>
+    ///     Identifier of the audit log document, available once the document
+    ///     is completed.
+    /// </summary>
+    public string? AuditLogDocumentId
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Recipients assigned to the document.
     /// </summary>
     public IReadOnlyList<EnvelopeRecipientResponse> Recipients
