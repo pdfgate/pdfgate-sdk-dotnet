@@ -146,7 +146,18 @@ public enum WebhookEventType
     /// <summary>
     ///     A document within an envelope was completed.
     /// </summary>
-    EnvelopeDocumentCompleted
+    EnvelopeDocumentCompleted,
+
+    /// <summary>
+    ///     A recipient completed the enrolment of a stored signature
+    ///     (automatic signing).
+    /// </summary>
+    RecipientSignatureEnrolled,
+
+    /// <summary>
+    ///     An active stored signature was removed from a recipient.
+    /// </summary>
+    RecipientSignatureRevoked
 }
 
 internal sealed class WebhookStatusJsonConverter
@@ -246,6 +257,10 @@ internal sealed class WebhookEventTypeJsonConverter
                 WebhookEventType.EnvelopeRecipientSigned,
             "envelope.document.completed" =>
                 WebhookEventType.EnvelopeDocumentCompleted,
+            "recipient.signature.enrolled" =>
+                WebhookEventType.RecipientSignatureEnrolled,
+            "recipient.signature.revoked" =>
+                WebhookEventType.RecipientSignatureRevoked,
             _ => (WebhookEventType?)null
         };
     }
@@ -265,6 +280,10 @@ internal sealed class WebhookEventTypeJsonConverter
                 "envelope.recipient.signed",
             WebhookEventType.EnvelopeDocumentCompleted =>
                 "envelope.document.completed",
+            WebhookEventType.RecipientSignatureEnrolled =>
+                "recipient.signature.enrolled",
+            WebhookEventType.RecipientSignatureRevoked =>
+                "recipient.signature.revoked",
             _ => throw new JsonException(
                 $"Unknown webhook event type value: '{value}'.")
         };

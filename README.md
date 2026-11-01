@@ -250,6 +250,11 @@ Use envelopes to manage recipient signing flows for documents with form fields.
 
 Each recipient is given either as an email and name, or as the `RecipientId` of a stored recipient (see [Managing recipients](#managing-recipients)) — never both. Optionally set `SigningOrder` (for every recipient of a document, or for none) to make recipients sign one after another: a recipient is emailed once everyone with a lower value has signed, and recipients with the same value can sign in parallel.
 
+Automatic signing is optional:
+
+- `AutoSign` applies the stored signature of the referenced recipient on their behalf when their turn to sign comes, with no signing session or email. Requires `RecipientId` pointing to a recipient with an active stored signature (see [Automatic signing](#automatic-signing)) and cannot be combined with `Embedded`. Every required field of the recipient must already have a value before the document is sent, except signature and auto-filled date fields.
+- `SendSignedCopy` controls whether the recipient is emailed the signed document when the document completes. Defaults to `true` for recipients who sign through the emailed signing link and `false` for embedded and automatic signing recipients.
+
 ```csharp
 var createEnvelopeRequest = new CreateEnvelopeRequest
 {
@@ -451,6 +456,74 @@ PdfGateRecipient updatedRecipient = await client.UpdateRecipientAsync(
     CancellationToken.None);
 ```
 
+Delete a stored recipient. Its personal data is removed from the directory; envelopes already sent are not affected. A recipient with an active stored signature or a pending enrolment cannot be deleted until the signature is removed:
+
+```csharp
+await client.DeleteRecipientAsync(
+    new DeleteRecipientRequest { Id = recipient.Id },
+    CancellationToken.None);
+```
+
+### Automatic Signing
+
+A recipient can store a reusable signature once, and later envelopes apply it on their behalf with no signing session. Request the enrolment, and PDFGate emails the recipient a link where they verify their email with a one-time code, accept the authorization text and type, draw or upload their signature. The link is valid for 7 days.
+
+```csharp
+PdfGateRecipient pending = await client.RequestRecipientSignatureAsync(
+    new RequestRecipientSignatureRequest { Id = recipient.Id },
+    CancellationToken.None);
+Console.WriteLine(pending.Signature!.Status); // Pending
+
+// Once the recipient completes the enrolment (webhook event
+// `recipient.signature.enrolled`), the signature is active.
+PdfGateRecipient enrolled = await client.GetRecipientAsync(
+    new GetRecipientRequest { Id = recipient.Id },
+    CancellationToken.None);
+Console.WriteLine(enrolled.Signature!.Status); // Active
+Console.WriteLine(enrolled.Signature.Image); // PNG data URL
+
+// Sign automatically: the recipient is signed at send, or when their turn
+// in the signing order comes. No signing email is sent.
+PdfGateEnvelope envelope = await client.CreateEnvelopeAsync(
+    new CreateEnvelopeRequest
+    {
+        RequesterName = "HR",
+        Documents =
+        [
+            new EnvelopeDocument
+            {
+                SourceDocumentId = uploadedResponse.Id,
+                Name = "Employment Agreement",
+                Recipients =
+                [
+                    new EnvelopeRecipient
+                    {
+                        Email = "anna@example.com",
+                        Name = "Anna Smith",
+                        Role = "employee",
+                        SigningOrder = 1
+                    },
+                    new EnvelopeRecipient
+                    {
+                        RecipientId = recipient.Id,
+                        Role = "ceo",
+                        SigningOrder = 2,
+                        AutoSign = true
+                    }
+                ]
+            }
+        ]
+    },
+    CancellationToken.None);
+
+// Remove the stored signature or cancel a pending enrolment.
+await client.RemoveRecipientSignatureAsync(
+    new RemoveRecipientSignatureRequest { Id = recipient.Id },
+    CancellationToken.None);
+```
+
+The `Signature` object on a recipient carries `Status` (`StoredSignatureStatus.Pending`, `Active` or `Revoked`), `RequestedAt`, `AdoptionMethod` (`SignatureAdoptionMethod.TypeSignature`, `DrawSignature` or `UploadSignature`), `EnrolledAt`, `RevokedAt`, `LastUsedAt` and `UseCount`. The `Image` is returned by `GetRecipientAsync` only while the signature is active. Removing an active signature fires the `recipient.signature.revoked` webhook event, and envelopes already waiting on it fall back to a signing link emailed to the recipient. The audit log records every automatic signature with the enrolment details.
+
 ### PDF Data Extraction
 
 The `ExtractPdfFormData` method lets you read data from a fillable PDF.
@@ -534,10 +607,13 @@ await client.DeleteWebhookAsync(
 ```
 
 The subscribable events are exposed via `WebhookEventType`: `EnvelopeSent`,
-`EnvelopeCompleted`, `EnvelopeExpired`, `EnvelopeRecipientActivated` (it became a
-recipient's turn to sign on a document with a signing order), and
-`EnvelopeDocumentCompleted`. The webhook URL must be publicly accessible
-(localhost is not supported).
+`EnvelopeCompleted`, `EnvelopeExpired`, `EnvelopeVoided`, `EnvelopeDeleted`,
+`EnvelopeRecipientSigned`, `EnvelopeRecipientActivated` (it became a
+recipient's turn to sign on a document with a signing order),
+`EnvelopeDocumentCompleted`, `RecipientSignatureEnrolled` (a recipient
+completed the enrolment of a stored signature) and `RecipientSignatureRevoked`
+(an active stored signature was removed). The webhook URL must be publicly
+accessible (localhost is not supported).
 
 Use `PdfGateWebhook.VerifySignature` to validate the
 `x-pdfgate-signature` header against the raw request body before

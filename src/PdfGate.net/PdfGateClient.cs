@@ -186,7 +186,10 @@ public sealed class PdfGateClient : IDisposable
     ///     recipientId of a stored recipient. Embedded recipients receive no
     ///     email and get their signing links via
     ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
-    ///     sending.
+    ///     sending. Set autoSign on a recipient referenced by recipientId
+    ///     with an active stored signature to sign on their behalf when their
+    ///     turn comes, with no signing session or email (see
+    ///     <see cref="RequestRecipientSignature(RequestRecipientSignatureRequest)" />).
     /// </summary>
     /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
     /// <returns>Created envelope metadata response.</returns>
@@ -202,7 +205,10 @@ public sealed class PdfGateClient : IDisposable
     ///     recipientId of a stored recipient. Embedded recipients receive no
     ///     email and get their signing links via
     ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
-    ///     sending.
+    ///     sending. Set autoSign on a recipient referenced by recipientId
+    ///     with an active stored signature to sign on their behalf when their
+    ///     turn comes, with no signing session or email (see
+    ///     <see cref="RequestRecipientSignature(RequestRecipientSignatureRequest)" />).
     /// </summary>
     /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -230,7 +236,10 @@ public sealed class PdfGateClient : IDisposable
     ///     recipientId of a stored recipient. Embedded recipients receive no
     ///     email and get their signing links via
     ///     <see cref="CreateEmbedLink(CreateEmbedLinkRequest)" /> after
-    ///     sending.
+    ///     sending. Set autoSign on a recipient referenced by recipientId
+    ///     with an active stored signature to sign on their behalf when their
+    ///     turn comes, with no signing session or email (see
+    ///     <see cref="RequestRecipientSignature(RequestRecipientSignatureRequest)" />).
     /// </summary>
     /// <param name="request">Create envelope request payload. See <see cref="CreateEnvelopeRequest" />.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -1475,6 +1484,214 @@ public sealed class PdfGateClient : IDisposable
         var url = ApiRoutes.GetRecipient(request.Id);
         var content = await _httpClient.PatchAsJsonAsync(url,
             BuildUpdateRecipientBody(request), cts.Token).ConfigureAwait(false);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Deletes a stored recipient. The record is kept with its personal
+    ///     data removed, so later reads return 404 and a new envelope to the
+    ///     same address creates a fresh recipient. Envelopes already sent
+    ///     are not affected. A recipient with an active stored signature or
+    ///     a pending enrolment cannot be deleted: call
+    ///     <see cref="RemoveRecipientSignature(RemoveRecipientSignatureRequest)" />
+    ///     first.
+    /// </summary>
+    /// <param name="request">Delete recipient request payload. See <see cref="DeleteRecipientRequest" />.</param>
+    public void DeleteRecipient(
+        DeleteRecipientRequest request)
+    {
+        DeleteRecipient(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Deletes a stored recipient. The record is kept with its personal
+    ///     data removed, so later reads return 404 and a new envelope to the
+    ///     same address creates a fresh recipient. Envelopes already sent
+    ///     are not affected. A recipient with an active stored signature or
+    ///     a pending enrolment cannot be deleted: call
+    ///     <see cref="RemoveRecipientSignature(RemoveRecipientSignatureRequest)" />
+    ///     first.
+    /// </summary>
+    /// <param name="request">Delete recipient request payload. See <see cref="DeleteRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public void DeleteRecipient(
+        DeleteRecipientRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.DeleteRecipient(request.Id);
+        _httpClient.Delete(url, cts.Token);
+    }
+
+    /// <summary>
+    ///     Deletes a stored recipient. The record is kept with its personal
+    ///     data removed, so later reads return 404 and a new envelope to the
+    ///     same address creates a fresh recipient. Envelopes already sent
+    ///     are not affected. A recipient with an active stored signature or
+    ///     a pending enrolment cannot be deleted: call
+    ///     <see cref="RemoveRecipientSignatureAsync(RemoveRecipientSignatureRequest, CancellationToken)" />
+    ///     first.
+    /// </summary>
+    /// <param name="request">Delete recipient request payload. See <see cref="DeleteRecipientRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public async Task DeleteRecipientAsync(
+        DeleteRecipientRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.DeleteRecipient(request.Id);
+        await _httpClient.DeleteAsync(url, cts.Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Automatic signing: emails the recipient a link to store a
+    ///     reusable signature. The recipient verifies their email with a
+    ///     one-time code, accepts the authorization text and types, draws or
+    ///     uploads their signature. The link is valid for 7 days; calling
+    ///     this again replaces a pending request. Once the enrolment is
+    ///     complete the recipient.signature.enrolled webhook fires and
+    ///     envelopes can set autoSign on this recipient. Rejected when the
+    ///     recipient has no email or already has an active stored signature.
+    /// </summary>
+    /// <param name="request">Request recipient signature request payload. See <see cref="RequestRecipientSignatureRequest" />.</param>
+    /// <returns>Recipient metadata response with the signature status set to pending.</returns>
+    public PdfGateRecipient RequestRecipientSignature(
+        RequestRecipientSignatureRequest request)
+    {
+        return RequestRecipientSignature(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Automatic signing: emails the recipient a link to store a
+    ///     reusable signature. The recipient verifies their email with a
+    ///     one-time code, accepts the authorization text and types, draws or
+    ///     uploads their signature. The link is valid for 7 days; calling
+    ///     this again replaces a pending request. Once the enrolment is
+    ///     complete the recipient.signature.enrolled webhook fires and
+    ///     envelopes can set autoSign on this recipient. Rejected when the
+    ///     recipient has no email or already has an active stored signature.
+    /// </summary>
+    /// <param name="request">Request recipient signature request payload. See <see cref="RequestRecipientSignatureRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Recipient metadata response with the signature status set to pending.</returns>
+    public PdfGateRecipient RequestRecipientSignature(
+        RequestRecipientSignatureRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.RequestRecipientSignature(request.Id);
+        var content = _httpClient.PostAsJson(url, "{}", cts.Token);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Automatic signing: emails the recipient a link to store a
+    ///     reusable signature. The recipient verifies their email with a
+    ///     one-time code, accepts the authorization text and types, draws or
+    ///     uploads their signature. The link is valid for 7 days; calling
+    ///     this again replaces a pending request. Once the enrolment is
+    ///     complete the recipient.signature.enrolled webhook fires and
+    ///     envelopes can set autoSign on this recipient. Rejected when the
+    ///     recipient has no email or already has an active stored signature.
+    /// </summary>
+    /// <param name="request">Request recipient signature request payload. See <see cref="RequestRecipientSignatureRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Recipient metadata response with the signature status set to pending.</returns>
+    public async Task<PdfGateRecipient> RequestRecipientSignatureAsync(
+        RequestRecipientSignatureRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.RequestRecipientSignature(request.Id);
+        var content = await _httpClient.PostAsJsonAsync(url, "{}", cts.Token)
+            .ConfigureAwait(false);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Automatic signing: removes the stored signature of a recipient, or
+    ///     cancels a pending enrolment. Envelopes already waiting on an
+    ///     automatic signature fall back to a signing link emailed to the
+    ///     recipient. Removing an active signature fires the
+    ///     recipient.signature.revoked webhook. Idempotent: a recipient
+    ///     without a stored signature is returned unchanged.
+    /// </summary>
+    /// <param name="request">Remove recipient signature request payload. See <see cref="RemoveRecipientSignatureRequest" />.</param>
+    /// <returns>Recipient metadata response.</returns>
+    public PdfGateRecipient RemoveRecipientSignature(
+        RemoveRecipientSignatureRequest request)
+    {
+        return RemoveRecipientSignature(request, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Automatic signing: removes the stored signature of a recipient, or
+    ///     cancels a pending enrolment. Envelopes already waiting on an
+    ///     automatic signature fall back to a signing link emailed to the
+    ///     recipient. Removing an active signature fires the
+    ///     recipient.signature.revoked webhook. Idempotent: a recipient
+    ///     without a stored signature is returned unchanged.
+    /// </summary>
+    /// <param name="request">Remove recipient signature request payload. See <see cref="RemoveRecipientSignatureRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Recipient metadata response.</returns>
+    public PdfGateRecipient RemoveRecipientSignature(
+        RemoveRecipientSignatureRequest request,
+        CancellationToken cancellationToken)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.RemoveRecipientSignature(request.Id);
+        var content = _httpClient.Delete(url, cts.Token);
+
+        return ParseRecipient(content, url);
+    }
+
+    /// <summary>
+    ///     Automatic signing: removes the stored signature of a recipient, or
+    ///     cancels a pending enrolment. Envelopes already waiting on an
+    ///     automatic signature fall back to a signing link emailed to the
+    ///     recipient. Removing an active signature fires the
+    ///     recipient.signature.revoked webhook. Idempotent: a recipient
+    ///     without a stored signature is returned unchanged.
+    /// </summary>
+    /// <param name="request">Remove recipient signature request payload. See <see cref="RemoveRecipientSignatureRequest" />.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Recipient metadata response.</returns>
+    public async Task<PdfGateRecipient> RemoveRecipientSignatureAsync(
+        RemoveRecipientSignatureRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(request);
+
+        using CancellationTokenSource cts =
+            CreateTimeoutTokenSource(_requestTimeouts.DefaultEndpoint,
+                cancellationToken);
+        var url = ApiRoutes.RemoveRecipientSignature(request.Id);
+        var content = await _httpClient.DeleteAsync(url, cts.Token)
+            .ConfigureAwait(false);
 
         return ParseRecipient(content, url);
     }

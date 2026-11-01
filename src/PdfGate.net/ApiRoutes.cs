@@ -67,6 +67,22 @@ internal static class ApiRoutes
         return $"recipient/{Uri.EscapeDataString(recipientId)}";
     }
 
+    internal static string DeleteRecipient(string recipientId)
+    {
+        return $"recipient/{Uri.EscapeDataString(recipientId)}";
+    }
+
+    internal static string RequestRecipientSignature(string recipientId)
+    {
+        return
+            $"recipient/{Uri.EscapeDataString(recipientId)}/signature/request";
+    }
+
+    internal static string RemoveRecipientSignature(string recipientId)
+    {
+        return $"recipient/{Uri.EscapeDataString(recipientId)}/signature";
+    }
+
     internal static string DeleteDocument(string documentId)
     {
         return $"document/{Uri.EscapeDataString(documentId)}";

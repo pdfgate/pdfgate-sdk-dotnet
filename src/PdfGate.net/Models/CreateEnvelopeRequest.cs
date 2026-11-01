@@ -140,6 +140,33 @@ public sealed record EnvelopeRecipient
     }
 
     /// <summary>
+    ///     Automatic signing. The stored signature of the referenced recipient
+    ///     is applied on their behalf when their turn to sign comes, with no
+    ///     signing session or email. Requires <see cref="RecipientId" />
+    ///     pointing to a recipient with an active stored signature and cannot
+    ///     be combined with <see cref="Embedded" />. Every required field of
+    ///     the recipient must already have a value before the document is
+    ///     sent, except signature and auto-filled date fields.
+    /// </summary>
+    public bool? AutoSign
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
+    ///     Whether to email this recipient the signed document when the
+    ///     document completes. Defaults to true for recipients who sign
+    ///     through the emailed signing link and false for embedded and
+    ///     automatic signing recipients.
+    /// </summary>
+    public bool? SendSignedCopy
+    {
+        get;
+        init;
+    }
+
+    /// <summary>
     ///     Optional recipient role.
     /// </summary>
     public string? Role
